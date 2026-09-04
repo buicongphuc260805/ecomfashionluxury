@@ -149,19 +149,28 @@
                   <div v-show="shippingMethod === 'standard'" class="w-2.5 h-2.5 rounded-full bg-black"></div>
                 </div>
                 <div>
-                  <p class="text-sm font-semibold text-neutral-900">GIAO HÀNG TIÊU CHUẨN</p>
+                  <div class="flex items-center gap-2">
+                    <p class="text-sm font-semibold text-neutral-900">GIAO HÀNG TIÊU CHUẨN</p>
+                    <span v-if="ghnCalculated" class="text-[10px] font-bold px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">GHN</span>
+                  </div>
                   <p class="text-xs text-neutral-400 mt-0.5">3 - 5 ngày làm việc</p>
                 </div>
               </div>
-              <span class="text-sm font-semibold text-neutral-800">Miễn phí</span>
+              <span class="text-sm font-semibold text-neutral-800">
+                <template v-if="calculatingGhnFee">Đang tính...</template>
+                <template v-else-if="ghnStandardFee > 0">{{ formatPrice(ghnStandardFee) }}đ</template>
+                <template v-else>30.000đ</template>
+              </span>
             </div>
 
             <!-- Express Shipping -->
             <div 
-              @click="shippingMethod = 'express'"
+              @click="isHcmCity ? (shippingMethod = 'express') : null"
               :class="[
-                'flex items-center justify-between border p-5 rounded-lg cursor-pointer transition-all duration-300 select-none',
-                shippingMethod === 'express' ? 'border-black bg-neutral-50/50' : 'border-neutral-200 hover:border-neutral-400'
+                'flex items-center justify-between border p-5 rounded-lg transition-all duration-300 select-none',
+                !isHcmCity ? 'opacity-60 cursor-not-allowed bg-neutral-100/50 border-neutral-200' : (
+                  shippingMethod === 'express' ? 'border-black bg-neutral-50/50 cursor-pointer' : 'border-neutral-200 hover:border-neutral-400 cursor-pointer'
+                )
               ]"
             >
               <div class="flex items-center gap-4">
@@ -169,11 +178,23 @@
                   <div v-show="shippingMethod === 'express'" class="w-2.5 h-2.5 rounded-full bg-black"></div>
                 </div>
                 <div>
-                  <p class="text-sm font-semibold text-neutral-900">GIAO HÀNG HỎA TỐC</p>
-                  <p class="text-xs text-neutral-400 mt-0.5">Trong vòng 24 giờ</p>
+                  <div class="flex items-center gap-2">
+                    <p class="text-sm font-semibold text-neutral-900">GIAO HÀNG HỎA TỐC</p>
+                    <span v-if="isHcmCity" class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded">Chỉ TP.HCM</span>
+                    <span v-else class="text-[10px] font-medium px-2 py-0.5 bg-neutral-200 text-neutral-500 rounded">Không hỗ trợ khu vực này</span>
+                  </div>
+                  <p class="text-xs text-neutral-400 mt-0.5">
+                    {{ isHcmCity ? 'Giao trong ngày / 24 giờ (Nội thành TP.HCM)' : 'Dịch vụ hỏa tốc chỉ hỗ trợ khu vực TP. Hồ Chí Minh' }}
+                  </p>
                 </div>
               </div>
-              <span class="text-sm font-semibold text-neutral-800">150.000đ</span>
+              <span class="text-sm font-semibold text-neutral-800">
+                <template v-if="!isHcmCity">--</template>
+                <template v-else-if="calculatingGhnFee">Đang tính...</template>
+                <template v-else-if="ghnExpressFee > 0">{{ formatPrice(ghnExpressFee) }}đ</template>
+                <template v-else-if="ghnStandardFee > 0">{{ formatPrice(ghnStandardFee + 25000) }}đ</template>
+                <template v-else>50.000đ</template>
+              </span>
             </div>
           </div>
         </div>
@@ -361,7 +382,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useClientAuthStore } from '@/stores/client/authStore'
 import { useCartStore } from '@/stores/client/cartStore'
@@ -389,7 +410,8 @@ const handleSePaySuccess = (orderCode) => {
   router.push({ name: 'CheckoutSuccess', query: { code: orderCode } })
 }
 
-const ghnFee = ref(0)
+const ghnStandardFee = ref(0)
+const ghnExpressFee = ref(0)
 const calculatingGhnFee = ref(false)
 const ghnCalculated = ref(false)
 
@@ -404,26 +426,70 @@ const shippingForm = reactive({
   phone: ''
 })
 
+const isHcmCity = computed(() => {
+  if (!shippingForm.province) return false
+  const p = shippingForm.province.toLowerCase().trim()
+  return p.includes('hồ chí minh') || p.includes('hcm') || p.includes('ho chi minh')
+})
+
+const shippingMethod = ref('standard')
+const paymentMethod = ref('cod') // cod, sepay hoặc vnpay
+
+watch(isHcmCity, (newVal) => {
+  if (!newVal && shippingMethod.value === 'express') {
+    shippingMethod.value = 'standard'
+  }
+})
+
 const calculateGhnShipping = async (districtId, wardCode) => {
   if (!districtId || !wardCode) return
   calculatingGhnFee.value = true
+  ghnCalculated.value = false
   try {
     const sRes = await shippingService.getServices(districtId)
     const services = sRes.data?.data || []
-    const activeService = services.find(s => s.service_type_id === 2) || services[0]
     
-    if (activeService) {
+    // Tìm gói Tiêu Chuẩn (service_type_id = 2 hoặc 3)
+    const standardService = services.find(s => s.service_type_id === 2 || s.service_type_id === 3) || services[0]
+    
+    // Tìm gói Hỏa Tốc / Nhanh (service_type_id = 1 hoặc short_name chứa 'hỏa tốc')
+    const expressService = services.find(s => 
+      s.service_type_id === 1 || 
+      (s.short_name && (s.short_name.toLowerCase().includes('hỏa tốc') || s.short_name.toLowerCase().includes('express')))
+    )
+
+    if (standardService) {
       const feeRes = await shippingService.calculateFee({
         district_id: districtId,
         ward_code: String(wardCode),
-        service_id: activeService.service_id,
+        service_id: standardService.service_id,
         weight: 500
       })
       if (feeRes.data && feeRes.data.success) {
-        ghnFee.value = feeRes.data.total
-        ghnCalculated.value = true
+        ghnStandardFee.value = feeRes.data.total
       }
     }
+
+    if (isHcmCity.value) {
+      if (expressService) {
+        const feeResExp = await shippingService.calculateFee({
+          district_id: districtId,
+          ward_code: String(wardCode),
+          service_id: expressService.service_id,
+          weight: 500
+        })
+        if (feeResExp.data && feeResExp.data.success) {
+          ghnExpressFee.value = feeResExp.data.total
+        } else {
+          ghnExpressFee.value = (ghnStandardFee.value || 30000) + 25000
+        }
+      } else {
+        // GHN không trả về gói hỏa tốc riêng biệt -> Phí chuẩn GHN + 25k phụ phí Hỏa tốc HCM
+        ghnExpressFee.value = (ghnStandardFee.value || 30000) + 25000
+      }
+    }
+
+    ghnCalculated.value = true
   } catch (err) {
     console.warn('Không thể tự động tính phí GHN:', err)
   } finally {
@@ -442,9 +508,6 @@ const onLocationChange = ({ province, district, ward, district_id, ward_code }) 
     calculateGhnShipping(district_id, ward_code)
   }
 }
-
-const shippingMethod = ref('standard')
-const paymentMethod = ref('cod') // cod hoặc vnpay
 
 // Coupon State
 const couponCode = ref('')
@@ -486,14 +549,24 @@ onMounted(async () => {
 })
 
 const shippingFee = computed(() => {
-  const baseFee = ghnFee.value > 0 ? ghnFee.value : (shippingMethod.value === 'express' ? 150000 : 30000)
-  return shippingMethod.value === 'express' ? baseFee + 50000 : baseFee
+  if (shippingMethod.value === 'express') {
+    if (!isHcmCity.value) return 30000
+    if (ghnExpressFee.value > 0) return ghnExpressFee.value
+    if (ghnStandardFee.value > 0) return ghnStandardFee.value + 25000
+    return 50000
+  }
+
+  if (ghnStandardFee.value > 0) return ghnStandardFee.value
+  return 30000
 })
 
 const shippingFeeText = computed(() => {
   if (calculatingGhnFee.value) return 'Đang tính phí GHN...'
-  if (ghnCalculated.value) return formatPrice(shippingFee.value) + 'đ (GHN)'
-  return shippingMethod.value === 'express' ? '150.000đ' : '30.000đ'
+  if (shippingMethod.value === 'express') {
+    if (!isHcmCity.value) return 'Chỉ áp dụng TP.HCM'
+    return formatPrice(shippingFee.value) + 'đ' + (ghnCalculated.value ? ' (GHN Hỏa Tốc)' : '')
+  }
+  return formatPrice(shippingFee.value) + 'đ' + (ghnCalculated.value ? ' (GHN)' : '')
 })
 
 const total = computed(() => {
