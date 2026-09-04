@@ -1,8 +1,8 @@
 <template>
   <div :class="wrapperClass">
-    <!-- Top Bar -->
+    <!-- Top Bar (Hidden on Mobile) -->
     <div
-      class="bg-black text-white px-5 lg:px-20 text-[11px] font-text tracking-[0.5px] transition-all duration-500 ease-in-out overflow-hidden"
+      class="hidden lg:block bg-black text-white px-5 lg:px-20 text-[11px] font-text tracking-[0.5px] transition-all duration-500 ease-in-out overflow-hidden"
       :class="topBarClass"
     >
       <div class="grid grid-cols-1 lg:grid-cols-3 items-center w-full max-lg:flex max-lg:flex-col max-lg:gap-2">
