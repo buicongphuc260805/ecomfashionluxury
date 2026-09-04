@@ -668,6 +668,12 @@ const isPaymentStatusLocked = computed(() => {
   if (activeOrder.value?.payment_method === 'vnpay' && activeOrder.value?.payment_status === 'paid') {
     return true
   }
+  // Lock payment status on cancelled orders (unless paid and can be refunded)
+  if (activeOrder.value?.status === 'cancelled') {
+    if (activeOrder.value?.payment_status !== 'paid') {
+      return true
+    }
+  }
   return false
 })
 

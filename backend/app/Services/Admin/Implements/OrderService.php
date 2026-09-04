@@ -187,6 +187,11 @@ class OrderService implements OrderServiceInterface
                 throw new Exception("Đơn hàng đã thanh toán online thành công qua VNPAY, không thể chuyển về 'Chưa thanh toán'.");
             }
 
+            // - Đơn đã bị Hủy (cancelled) -> KHÓA THÔNG TIN THANH TOÁN, không được đổi sang 'paid'
+            if ($oldStatus === 'cancelled' && $newPaymentStatus === 'paid') {
+                throw new Exception("Đơn hàng đã bị Hủy, không thể thay đổi trạng thái thanh toán thành 'Đã thanh toán'.");
+            }
+
             // - Trạng thái 'refunded' (Đã hoàn tiền) chỉ cho phép khi đơn hàng bị 'cancelled'
             if ($newPaymentStatus === 'refunded' && $newStatus !== 'cancelled') {
                 throw new Exception("Trạng thái 'Đã hoàn tiền' chỉ áp dụng đối với các đơn hàng đã bị Hủy.");

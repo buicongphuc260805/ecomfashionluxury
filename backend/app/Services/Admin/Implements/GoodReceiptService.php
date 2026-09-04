@@ -93,6 +93,12 @@ class GoodReceiptService implements GoodReceiptServiceInterface
 
     public function delete(Model $model): void
     {
+        if ($model->status === 'completed') {
+            throw new \Exception('Phiếu nhập kho đã hoàn thành (đã cộng tồn kho vào sản phẩm), không thể xóa.');
+        }
+        if ($model->status === 'approved') {
+            throw new \Exception('Phiếu nhập kho đã được duyệt, không thể xóa trực tiếp.');
+        }
         $this->repo->delete($model);
     }
 
