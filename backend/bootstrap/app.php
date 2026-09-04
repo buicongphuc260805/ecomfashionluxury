@@ -75,7 +75,7 @@ return Application::configure(basePath: dirname(__DIR__))
             // ── 5. Server Error (500) ──────────────────────────────────────
             return response()->json([
                 'success' => false,
-                'message' => 'Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.',
+                'message' => config('app.debug') ? $e->getMessage() : 'Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.',
             ], 500);
         });
     })->create();
