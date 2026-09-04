@@ -95,7 +95,7 @@ class AuthService implements AuthServiceInterface
 
             return [
                 'success' => false,
-                'message' => 'Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.',
+                'message' => config('app.debug') ? '[Mail Error] '.$e->getMessage() : 'Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.',
             ];
         }
     }
