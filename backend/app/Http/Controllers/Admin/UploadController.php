@@ -73,20 +73,20 @@ class UploadController extends Controller
         $filename = Str::uuid().'.'.$extension;
 
         try {
-            // Lưu vào storage/app/public/images/{folder}/{filename}
-            // → Accessible qua /storage/images/{folder}/{filename} (sau khi php artisan storage:link)
+            $disk = config('filesystems.default', 'public');
+
             $path = $file->storeAs(
                 "images/{$folder}",
                 $filename,
-                'public'
+                $disk
             );
 
             if (! $path) {
                 throw new \Exception('Không thể ghi file vào storage.');
             }
 
-            // Xây dựng URL đầy đủ: APP_URL + /storage/ + path
-            $url = rtrim(config('app.url'), '/').'/storage/'.$path;
+            // Dùng Storage::disk()->url() hỗ trợ cả Local Storage lẫn Cloudflare R2 / AWS S3
+            $url = Storage::disk($disk)->url($path);
 
             return response()->json([
                 'success' => true,
@@ -158,8 +158,10 @@ class UploadController extends Controller
             ], 422);
         }
 
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
+        $disk = config('filesystems.default', 'public');
+
+        if (Storage::disk($disk)->exists($path)) {
+            Storage::disk($disk)->delete($path);
         }
 
         return response()->json([
