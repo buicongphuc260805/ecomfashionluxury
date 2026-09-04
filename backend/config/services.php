@@ -46,6 +46,8 @@ return [
         'url' => env('GHN_API_URL', 'https://online-gateway.ghn.vn/shiip/public-api'),
         'token' => env('GHN_TOKEN'),
         'shop_id' => env('GHN_SHOP_ID'),
+        'from_district_id' => env('GHN_FROM_DISTRICT_ID', 1454), // Mặc định Quận 12 TP.HCM
+        'from_ward_code' => env('GHN_FROM_WARD_CODE', '21211'),  // Mặc định Phường Tân Thới Hiệp Q12
     ],
 
     'sepay' => [

@@ -12,11 +12,17 @@ class ShippingService
 
     private int $shopId;
 
+    private int $fromDistrictId;
+
+    private string $fromWardCode;
+
     public function __construct()
     {
         $this->baseUrl = rtrim(config('services.ghn.url'), '/');
         $this->token = config('services.ghn.token');
         $this->shopId = (int) config('services.ghn.shop_id');
+        $this->fromDistrictId = (int) config('services.ghn.from_district_id', 1454);
+        $this->fromWardCode = (string) config('services.ghn.from_ward_code', '21211');
     }
 
     /** Lấy danh sách tỉnh/thành từ GHN */
@@ -56,7 +62,7 @@ class ShippingService
         $res = Http::withHeaders(['token' => $this->token])
             ->post("{$this->baseUrl}/v2/shipping-order/available-services", [
                 'shop_id' => $this->shopId,
-                'from_district' => 0,   // sẽ tự resolve theo shop_id
+                'from_district' => $this->fromDistrictId,
                 'to_district' => $toDistrictId,
             ]);
 
@@ -66,18 +72,22 @@ class ShippingService
     /** Tính phí vận chuyển theo GHN */
     public function calculateFee(int $districtId, string $wardCode, int $serviceId, int $weightGram = 500): array
     {
-        $res = Http::withHeaders([
-            'token' => $this->token,
-            'shop_id' => $this->shopId,
-        ])->post("{$this->baseUrl}/v2/shipping-order/fee", [
+        $payload = [
             'service_id' => $serviceId,
+            'from_district_id' => $this->fromDistrictId,
+            'from_ward_code' => $this->fromWardCode,
             'to_district_id' => $districtId,
             'to_ward_code' => $wardCode,
             'weight' => $weightGram,
             'length' => 20,
             'width' => 15,
             'height' => 5,
-        ]);
+        ];
+
+        $res = Http::withHeaders([
+            'token' => $this->token,
+            'shop_id' => $this->shopId,
+        ])->post("{$this->baseUrl}/v2/shipping-order/fee", $payload);
 
         if ($res->successful() && isset($res->json('data')['total'])) {
             return [
