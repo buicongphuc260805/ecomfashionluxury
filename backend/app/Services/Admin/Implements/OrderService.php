@@ -143,28 +143,53 @@ class OrderService implements OrderServiceInterface
 
             $oldStatus = $model->status;
             $newStatus = $data['status'] ?? $oldStatus;
+            $oldPaymentStatus = $model->payment_status;
+            $newPaymentStatus = $data['payment_status'] ?? $oldPaymentStatus;
 
-            // 1. Kiểm tra trạng thái đã đóng (Terminal statuses)
-            if ($oldStatus === 'completed' && $newStatus !== 'completed') {
-                throw new Exception("Đơn hàng đã giao thành công (Hoàn thành), không thể thay đổi sang trạng thái khác.");
+            // 1. Kiểm tra ma trận chuyển trạng thái Đơn hàng (Strict Sequential State Machine)
+            $allowedStatusTransitions = [
+                'pending'   => ['pending', 'confirmed', 'cancelled'],
+                'confirmed' => ['confirmed', 'shipping', 'cancelled'],
+                'shipping'  => ['shipping', 'completed', 'cancelled'],
+                'completed' => ['completed'], // Trạng thái cuối: Khóa hoàn toàn
+                'cancelled' => ['cancelled'], // Trạng thái cuối: Khóa hoàn toàn
+            ];
+
+            if (isset($allowedStatusTransitions[$oldStatus])) {
+                if (! in_array($newStatus, $allowedStatusTransitions[$oldStatus])) {
+                    $statusNames = [
+                        'pending'   => 'Chờ xử lý',
+                        'confirmed' => 'Đã xác nhận',
+                        'shipping'  => 'Đang giao hàng',
+                        'completed' => 'Đã giao hàng (Hoàn thành)',
+                        'cancelled' => 'Đã hủy',
+                    ];
+                    $oldName = $statusNames[$oldStatus] ?? $oldStatus;
+                    $newName = $statusNames[$newStatus] ?? $newStatus;
+                    throw new Exception("Không thể chuyển đơn hàng từ '{$oldName}' sang '{$newName}'. Vui lòng tuân thủ quy trình xử lý theo đúng thứ tự (Chờ xử lý ➔ Đã xác nhận ➔ Đang giao ➔ Đã giao).");
+                }
             }
 
-            if ($oldStatus === 'cancelled' && $newStatus !== 'cancelled') {
-                throw new Exception("Đơn hàng đã bị hủy, không thể thay đổi sang trạng thái khác.");
-            }
-
-            // 2. Kiểm tra quy trình một chiều (Không cho phép lùi trạng thái)
-            if ($oldStatus === 'confirmed' && $newStatus === 'pending') {
-                throw new Exception("Đơn hàng đã xác nhận, không thể quay lại trạng thái Chờ xử lý.");
-            }
-
-            if ($oldStatus === 'shipping' && in_array($newStatus, ['pending', 'confirmed'])) {
-                throw new Exception("Đơn hàng đang giao, không thể quay lại trạng thái trước đó.");
-            }
-
-            // 3. Tự động chuyển trạng thái thanh toán sang 'paid' khi đơn hoàn thành
-            if ($newStatus === 'completed' && (!isset($data['payment_status']) || $data['payment_status'] === 'unpaid')) {
+            // 2. Tự động & Ràng buộc trạng thái thanh toán (Payment Status Rules)
+            // - Đơn chuyển sang completed -> tự động cập nhật payment_status = 'paid'
+            if ($newStatus === 'completed') {
                 $data['payment_status'] = 'paid';
+                $newPaymentStatus = 'paid';
+            }
+
+            // - Đơn đã hoàn thành & đã thanh toán -> Không cho chuyển về 'unpaid'
+            if ($oldStatus === 'completed' && $oldPaymentStatus === 'paid' && $newPaymentStatus === 'unpaid') {
+                throw new Exception("Đơn hàng đã hoàn thành và thanh toán, không thể chuyển về trạng thái 'Chưa thanh toán'.");
+            }
+
+            // - Đơn thanh toán VNPAY đã paid -> Không cho chuyển về 'unpaid'
+            if ($model->payment_method === 'vnpay' && $oldPaymentStatus === 'paid' && $newPaymentStatus === 'unpaid') {
+                throw new Exception("Đơn hàng đã thanh toán online thành công qua VNPAY, không thể chuyển về 'Chưa thanh toán'.");
+            }
+
+            // - Trạng thái 'refunded' (Đã hoàn tiền) chỉ cho phép khi đơn hàng bị 'cancelled'
+            if ($newPaymentStatus === 'refunded' && $newStatus !== 'cancelled') {
+                throw new Exception("Trạng thái 'Đã hoàn tiền' chỉ áp dụng đối với các đơn hàng đã bị Hủy.");
             }
 
             // Load details for stock logic if not loaded

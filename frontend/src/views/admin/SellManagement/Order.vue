@@ -491,7 +491,7 @@
                         >
                           <option value="unpaid">Chưa thanh toán</option>
                           <option value="paid">Đã thanh toán</option>
-                          <option value="refunded">Đã hoàn tiền</option>
+                          <option v-if="editForm.status === 'cancelled'" value="refunded">Đã hoàn tiền</option>
                         </select>
                       </div>
 
@@ -661,12 +661,12 @@ const isStatusLocked = computed(() => {
 })
 
 const isPaymentStatusLocked = computed(() => {
-  // If order is completed and already paid, prevent changing payment status back
+  // Lock if order is completed & paid, or if paid via VNPAY online
   if (activeOrder.value?.status === 'completed' && activeOrder.value?.payment_status === 'paid') {
     return true
   }
-  if (activeOrder.value?.status === 'cancelled') {
-    return false // Admin can refund if needed
+  if (activeOrder.value?.payment_method === 'vnpay' && activeOrder.value?.payment_status === 'paid') {
+    return true
   }
   return false
 })
