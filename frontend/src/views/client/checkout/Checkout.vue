@@ -473,14 +473,7 @@ onMounted(async () => {
         if (defaultAddr) {
           shippingForm.fullName = defaultAddr.receiver_name
           shippingForm.phone = defaultAddr.receiver_phone
-          
-          const addressParts = [
-            defaultAddr.detail_address,
-            defaultAddr.ward,
-            defaultAddr.district
-          ].filter(Boolean)
-          
-          shippingForm.address = addressParts.join(', ')
+          shippingForm.address = defaultAddr.detail_address || ''
           shippingForm.province = defaultAddr.province || ''
           shippingForm.district = defaultAddr.district || ''
           shippingForm.ward = defaultAddr.ward || ''
