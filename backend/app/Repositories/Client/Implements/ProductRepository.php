@@ -82,6 +82,19 @@ class ProductRepository implements ProductRepositoryInterface
         }
 
         switch ($sort) {
+            case 'best_selling':
+            case 'bestseller':
+                $query->selectSub(function ($q) {
+                    $q->from('order_details')
+                        ->join('product_variants', 'product_variants.id', '=', 'order_details.product_variant_id')
+                        ->join('orders', 'orders.id', '=', 'order_details.order_id')
+                        ->whereColumn('product_variants.product_id', 'products.id')
+                        ->where('orders.order_status', '!=', 'cancelled')
+                        ->selectRaw('COALESCE(SUM(order_details.quantity), 0)');
+                }, 'total_sold')
+                ->orderByDesc('total_sold')
+                ->latest();
+                break;
             case 'price_asc':
                 $query->orderByRaw('(
                     SELECT MIN(COALESCE(sale_price, price))

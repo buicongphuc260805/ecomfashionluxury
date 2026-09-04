@@ -143,8 +143,10 @@
               class="border border-neutral-200 px-3 py-1.5 text-xs font-text outline-none focus:border-black bg-white cursor-pointer"
             >
               <option value="latest">Mới nhất</option>
+              <option value="best_selling">Bán chạy nhất</option>
               <option value="price_asc">Giá: Thấp đến Cao</option>
               <option value="price_desc">Giá: Cao đến Thấp</option>
+              <option value="top_rated">Đánh giá cao nhất</option>
             </select>
           </div>
         </div>
