@@ -6,8 +6,8 @@ import { useAuthStore } from '@/stores/admin/authStore'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const email = ref('admin@ecom.com')
-const password = ref('password123')
+const email = ref('')
+const password = ref('')
 const rememberMe = ref(false)
 const showPassword = ref(false)
 const isLoading = ref(false)
