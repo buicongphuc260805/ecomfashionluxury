@@ -1,165 +1,298 @@
 <template>
-  <div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Tạo Đơn Hàng Mới (POS)</h1>
-      <button @click="$router.push('/admin/orders')" class="px-4 py-2 border rounded-md hover:bg-gray-50">
+  <div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Tạo Đơn Hàng Mới (POS)</h1>
+        <p class="text-sm text-slate-500 mt-0.5">Tạo đơn bán hàng trực tiếp tại quầy hoặc tạo đơn đặt hàng thủ công cho khách</p>
+      </div>
+      <button 
+        @click="$router.push('/admin/orders')" 
+        class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-black text-slate-700 hover:text-black rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-[0.98]"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
         Hủy & Quay lại
       </button>
     </div>
 
+    <!-- Main Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Cột Trái: Sản phẩm -->
-      <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">Sản phẩm</h2>
-        
-        <!-- Ô tìm kiếm sản phẩm -->
-        <div class="mb-4 relative">
-          <input 
-            v-model="searchQuery"
-            @input="searchProducts"
-            type="text" 
-            placeholder="Tìm kiếm sản phẩm theo tên..." 
-            class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-black"
-          >
-          <div v-if="searchResults.length > 0 && searchQuery" class="absolute z-10 w-full bg-white border mt-1 max-h-60 overflow-y-auto rounded shadow-lg">
-            <div 
-              v-for="prod in searchResults" 
-              :key="prod.id"
-              class="p-2 border-b hover:bg-gray-50"
-            >
-              <div class="font-medium text-sm">{{ prod.name }}</div>
-              <div class="flex gap-2 mt-2 flex-wrap">
-                <button 
-                  v-for="variant in prod.variants" 
-                  :key="variant.id"
-                  @click="addVariantToCart(prod, variant)"
-                  class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded border transition-colors"
-                  :class="{'opacity-50 cursor-not-allowed text-red-500': variant.stock_quantity <= 0}"
-                  :disabled="variant.stock_quantity <= 0"
-                >
-                  {{ getVariantName(variant) }} (Tồn: {{ variant.stock_quantity }})
-                </button>
-              </div>
-            </div>
+      
+      <!-- Cột Trái: Tìm kiếm & Danh sách sản phẩm trong đơn -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <svg class="w-5 h-5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+              Sản phẩm trong đơn
+            </h2>
+            <span class="text-xs font-semibold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">
+              {{ cart.length }} sản phẩm đã chọn
+            </span>
           </div>
-        </div>
+          
+          <!-- Search Input for Products -->
+          <div class="relative">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tìm & Thêm sản phẩm</label>
+            <div class="relative flex items-center">
+              <span class="absolute left-3.5 text-slate-400">
+                <svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </span>
+              <input 
+                v-model="searchQuery"
+                @input="searchProducts"
+                type="text" 
+                placeholder="Nhập tên sản phẩm hoặc mã SKU..." 
+                class="w-full pl-10 pr-4 py-3 text-sm border border-slate-200 rounded-xl text-slate-800 bg-slate-50/50 placeholder-slate-400 focus:bg-white focus:border-black focus:ring-4 focus:ring-slate-900/5 focus:outline-none transition-all font-medium"
+              />
+              <button 
+                v-if="searchQuery" 
+                @click="searchQuery = ''; searchResults = []" 
+                class="absolute right-3 text-slate-400 hover:text-slate-600"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
 
-        <!-- Giỏ hàng -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse min-w-[500px]">
-            <thead>
-              <tr class="bg-gray-50 border-b text-sm">
-                <th class="p-3">Sản phẩm</th>
-                <th class="p-3 w-24">Số lượng</th>
-                <th class="p-3 w-32">Đơn giá</th>
-                <th class="p-3 w-32">Thành tiền</th>
-                <th class="p-3 w-10"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="cart.length === 0">
-                <td colspan="5" class="p-6 text-center text-gray-500 text-sm">Chưa có sản phẩm nào được chọn.</td>
-              </tr>
-              <tr v-for="(item, index) in cart" :key="index" class="border-b">
-                <td class="p-3">
-                  <div class="font-medium text-sm text-gray-800">{{ item.product_name }}</div>
-                  <div class="text-xs text-gray-500 mt-1">{{ item.variant_name }}</div>
-                </td>
-                <td class="p-3">
-                  <input type="number" v-model.number="item.quantity" min="1" :max="item.max_stock" class="w-16 border rounded p-1 text-center text-sm focus:outline-none focus:border-black">
-                </td>
-                <td class="p-3 text-sm text-gray-600">{{ formatPrice(item.price) }}đ</td>
-                <td class="p-3 font-semibold text-sm text-black">{{ formatPrice(item.price * item.quantity) }}đ</td>
-                <td class="p-3">
-                  <button @click="removeItem(index)" class="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded-full hover:bg-red-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <!-- Search Dropdown Results -->
+            <Transition name="fade">
+              <div 
+                v-if="searchResults.length > 0 && searchQuery" 
+                class="absolute z-30 w-full bg-white border border-slate-200 mt-2 max-h-80 overflow-y-auto rounded-2xl shadow-xl divide-y divide-slate-100"
+              >
+                <div 
+                  v-for="prod in searchResults" 
+                  :key="prod.id"
+                  class="p-4 hover:bg-slate-50/80 transition-colors"
+                >
+                  <div class="font-bold text-slate-800 text-sm flex items-center justify-between">
+                    <span>{{ prod.name }}</span>
+                    <span class="text-xs text-slate-400 font-normal font-mono">ID: #{{ prod.id }}</span>
+                  </div>
+                  <div class="flex gap-2 mt-2.5 flex-wrap">
+                    <button 
+                      v-for="variant in prod.variants" 
+                      :key="variant.id"
+                      @click="addVariantToCart(prod, variant)"
+                      :disabled="variant.stock_quantity <= 0"
+                      class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer"
+                      :class="variant.stock_quantity > 0 
+                        ? 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-black hover:text-white hover:border-black' 
+                        : 'bg-rose-50 border-rose-100 text-rose-400 cursor-not-allowed opacity-60'"
+                    >
+                      <span>{{ getVariantName(variant) }}</span>
+                      <span class="font-mono text-[11px] opacity-75">(Tồn: {{ variant.stock_quantity }})</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+          </div>
+
+          <!-- Cart Products Table -->
+          <div class="border border-slate-100 rounded-xl overflow-hidden shadow-2xs">
+            <table class="w-full text-left border-collapse min-w-[500px]">
+              <thead>
+                <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                  <th class="py-3.5 px-4">Sản phẩm</th>
+                  <th class="py-3.5 px-4 text-center w-32">Số lượng</th>
+                  <th class="py-3.5 px-4 text-right w-32">Đơn giá</th>
+                  <th class="py-3.5 px-4 text-right w-36">Thành tiền</th>
+                  <th class="py-3.5 px-4 text-center w-12"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+                <tr v-if="cart.length === 0">
+                  <td colspan="5" class="py-12 text-center text-slate-400">
+                    <div class="flex flex-col items-center justify-center gap-2">
+                      <svg class="w-10 h-10 text-slate-300 stroke-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                      </svg>
+                      <span class="text-sm font-medium">Chưa có sản phẩm nào được chọn.</span>
+                      <span class="text-xs text-slate-400">Sử dụng ô tìm kiếm ở trên để thêm sản phẩm vào đơn.</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr v-for="(item, index) in cart" :key="index" class="hover:bg-slate-50/50 transition-colors">
+                  <td class="py-3.5 px-4">
+                    <div class="font-bold text-slate-800 text-sm leading-snug">{{ item.product_name }}</div>
+                    <div class="text-xs text-slate-400 font-mono mt-0.5 flex items-center gap-2">
+                      <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-sans font-medium text-[11px]">{{ item.variant_name }}</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    <div class="flex items-center justify-center border border-slate-200 rounded-lg overflow-hidden w-24 mx-auto bg-white">
+                      <button 
+                        @click="item.quantity > 1 ? item.quantity-- : removeItem(index)" 
+                        class="w-7 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors"
+                      >-</button>
+                      <input 
+                        type="number" 
+                        v-model.number="item.quantity" 
+                        min="1" 
+                        :max="item.max_stock" 
+                        class="w-10 text-center font-mono font-bold text-slate-800 text-xs outline-none bg-transparent"
+                      />
+                      <button 
+                        @click="item.quantity < item.max_stock ? item.quantity++ : toast.warning('Vượt quá kho!')" 
+                        class="w-7 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors"
+                      >+</button>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-right font-semibold text-slate-700 font-mono text-sm">
+                    {{ formatPrice(item.price) }}đ
+                  </td>
+                  <td class="py-3.5 px-4 text-right font-bold text-slate-900 font-mono text-sm">
+                    {{ formatPrice(item.price * item.quantity) }}đ
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    <button 
+                      @click="removeItem(index)" 
+                      class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      title="Xóa khỏi đơn"
+                    >
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Cột Phải: Khách hàng & Thanh toán -->
+      <!-- Cột Phải: Khách hàng & Tổng quan thanh toán -->
       <div class="space-y-6">
         
         <!-- Khách hàng -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">Thông tin giao hàng</h2>
-          <div class="space-y-4 text-sm">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+          <h2 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+            <svg class="w-5 h-5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            Thông tin người nhận
+          </h2>
+
+          <div class="space-y-4">
             <div>
-              <label class="block text-gray-700 font-medium mb-1">Họ tên người nhận <span class="text-red-500">*</span></label>
-              <input v-model="order.shipping_name" type="text" :class="['w-full border p-2 rounded focus:outline-none focus:border-black', errors.shipping_name ? 'border-red-500' : '']" placeholder="Nhập họ tên...">
-              <p v-if="errors.shipping_name" class="text-red-500 text-xs mt-1">{{ errors.shipping_name }}</p>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                Họ tên người nhận <span class="text-rose-500">*</span>
+              </label>
+              <input 
+                v-model="order.shipping_name" 
+                type="text" 
+                :class="['w-full py-2.5 px-3.5 text-sm border rounded-xl text-slate-800 bg-slate-50/50 focus:bg-white focus:border-black focus:outline-none transition-all font-medium', errors.shipping_name ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200']" 
+                placeholder="Nhập tên người nhận..."
+              />
+              <p v-if="errors.shipping_name" class="text-rose-500 text-xs font-medium mt-1">{{ errors.shipping_name }}</p>
             </div>
+
             <div>
-              <label class="block text-gray-700 font-medium mb-1">Số điện thoại <span class="text-red-500">*</span></label>
-              <input v-model="order.shipping_phone" type="text" :class="['w-full border p-2 rounded focus:outline-none focus:border-black', errors.shipping_phone ? 'border-red-500' : '']" placeholder="Nhập số điện thoại...">
-              <p v-if="errors.shipping_phone" class="text-red-500 text-xs mt-1">{{ errors.shipping_phone }}</p>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                Số điện thoại <span class="text-rose-500">*</span>
+              </label>
+              <input 
+                v-model="order.shipping_phone" 
+                type="text" 
+                :class="['w-full py-2.5 px-3.5 text-sm border rounded-xl text-slate-800 bg-slate-50/50 focus:bg-white focus:border-black focus:outline-none transition-all font-medium font-mono', errors.shipping_phone ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200']" 
+                placeholder="Ví dụ: 0912345678"
+              />
+              <p v-if="errors.shipping_phone" class="text-rose-500 text-xs font-medium mt-1">{{ errors.shipping_phone }}</p>
             </div>
+
             <div>
-              <label class="block text-gray-700 font-medium mb-1">Địa chỉ giao hàng <span class="text-red-500">*</span></label>
-              <textarea v-model="order.shipping_address" :class="['w-full border p-2 rounded focus:outline-none focus:border-black', errors.shipping_address ? 'border-red-500' : '']" rows="3" placeholder="Nhập địa chỉ chi tiết..."></textarea>
-              <p v-if="errors.shipping_address" class="text-red-500 text-xs mt-1">{{ errors.shipping_address }}</p>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                Địa chỉ giao hàng <span class="text-rose-500">*</span>
+              </label>
+              <textarea 
+                v-model="order.shipping_address" 
+                :class="['w-full py-2.5 px-3.5 text-sm border rounded-xl text-slate-800 bg-slate-50/50 focus:bg-white focus:border-black focus:outline-none transition-all font-medium', errors.shipping_address ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200']" 
+                rows="3" 
+                placeholder="Địa chỉ số nhà, tên đường, phường/xã, quận/huyện..."
+              ></textarea>
+              <p v-if="errors.shipping_address" class="text-rose-500 text-xs font-medium mt-1">{{ errors.shipping_address }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Thanh toán -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">Thanh toán</h2>
+        <!-- Thanh toán & Xác nhận -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
+          <h2 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+            <svg class="w-5 h-5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+            Thanh toán & Đơn hàng
+          </h2>
           
-          <div class="flex justify-between items-center mb-3 text-sm">
-            <span class="text-gray-600">Tổng tiền hàng:</span>
-            <span class="font-medium">{{ formatPrice(subTotal) }}đ</span>
-          </div>
-          
-          <div class="flex justify-between items-center mb-3 text-sm">
-            <span class="text-gray-600">Phí vận chuyển:</span>
-            <input v-model.number="order.shipping_fee" type="number" class="w-24 border p-1 rounded text-right focus:outline-none focus:border-black">
-          </div>
-          
-          <div class="flex justify-between items-center mb-4 text-sm">
-            <span class="text-gray-600">Giảm giá thêm:</span>
-            <input v-model.number="order.discount_amount" type="number" class="w-24 border p-1 rounded text-right focus:outline-none focus:border-black text-red-500">
+          <div class="space-y-2.5 text-xs text-slate-600">
+            <div class="flex justify-between items-center">
+              <span>Tổng tiền hàng:</span>
+              <span class="font-mono font-bold text-slate-800 text-sm">{{ formatPrice(subTotal) }}đ</span>
+            </div>
+            
+            <div class="flex justify-between items-center">
+              <span>Phí vận chuyển:</span>
+              <div class="flex items-center gap-1">
+                <input v-model.number="order.shipping_fee" type="number" class="w-24 border border-slate-200 py-1 px-2 rounded-lg text-right font-mono font-semibold text-xs focus:border-black focus:outline-none">
+                <span class="font-mono">đ</span>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-center text-rose-600">
+              <span>Giảm giá thêm:</span>
+              <div class="flex items-center gap-1">
+                <input v-model.number="order.discount_amount" type="number" class="w-24 border border-rose-200 py-1 px-2 rounded-lg text-right font-mono font-semibold text-xs text-rose-600 focus:border-rose-500 focus:outline-none bg-rose-50/20">
+                <span class="font-mono">đ</span>
+              </div>
+            </div>
           </div>
 
-          <div class="flex justify-between items-center py-4 border-t border-b mb-5 bg-gray-50 px-3 rounded">
-            <span class="font-bold text-gray-800 uppercase text-sm">Khách phải trả:</span>
-            <span class="font-bold text-black text-xl">{{ formatPrice(finalAmount) }}đ</span>
+          <!-- Total summary card -->
+          <div class="bg-slate-900 text-white p-4.5 rounded-xl flex justify-between items-center shadow-md">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Khách phải trả:</span>
+            <span class="font-mono font-extrabold text-xl tracking-tight text-white">{{ formatPrice(finalAmount) }}đ</span>
           </div>
 
-          <div class="space-y-4 text-sm mb-6">
+          <div class="space-y-4 text-xs pt-1">
             <div>
-              <label class="block text-gray-700 font-medium mb-1">Phương thức thanh toán</label>
-              <select v-model="order.payment_method" class="w-full border p-2 rounded focus:outline-none focus:border-black bg-white">
+              <label class="block font-bold text-slate-500 uppercase tracking-wider mb-1.5">Phương thức thanh toán</label>
+              <select v-model="order.payment_method" class="w-full py-2.5 px-3 border border-slate-200 rounded-xl text-sm font-medium focus:border-black focus:outline-none bg-white">
                 <option value="cash">Tiền mặt (tại quầy)</option>
                 <option value="cod">Thanh toán khi nhận hàng (COD)</option>
-                <option value="bank_transfer">Chuyển khoản</option>
+                <option value="vnpay">Chuyển khoản / VNPAY</option>
               </select>
             </div>
+
             <div>
-              <label class="block text-gray-700 font-medium mb-1">Trạng thái thanh toán</label>
-              <select v-model="order.payment_status" class="w-full border p-2 rounded focus:outline-none focus:border-black bg-white">
-                <option value="unpaid">Chưa thanh toán</option>
+              <label class="block font-bold text-slate-500 uppercase tracking-wider mb-1.5">Trạng thái thanh toán</label>
+              <select v-model="order.payment_status" class="w-full py-2.5 px-3 border border-slate-200 rounded-xl text-sm font-medium focus:border-black focus:outline-none bg-white">
                 <option value="paid">Đã thanh toán</option>
+                <option value="unpaid">Chưa thanh toán</option>
               </select>
             </div>
+
             <div>
-              <label class="block text-gray-700 font-medium mb-1">Ghi chú đơn hàng</label>
-              <textarea v-model="order.note" class="w-full border p-2 rounded focus:outline-none focus:border-black" rows="2" placeholder="Ghi chú thêm..."></textarea>
+              <label class="block font-bold text-slate-500 uppercase tracking-wider mb-1.5">Ghi chú đơn hàng</label>
+              <textarea v-model="order.note" class="w-full py-2 px-3 border border-slate-200 rounded-xl text-sm font-medium focus:border-black focus:outline-none" rows="2" placeholder="Ghi chú thêm cho đơn hàng..."></textarea>
             </div>
           </div>
 
           <button 
             @click="submitOrder" 
             :disabled="isSubmitting || cart.length === 0"
-            class="w-full bg-black text-white font-bold py-3.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors uppercase tracking-wider text-sm shadow-md"
+            class="w-full py-3.5 bg-black hover:bg-neutral-800 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 uppercase tracking-wider text-xs disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
           >
-            {{ isSubmitting ? 'Đang xử lý...' : 'Xác Nhận Tạo Đơn' }}
+            <svg v-if="isSubmitting" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <span>{{ isSubmitting ? 'Đang xử lý...' : 'Xác Nhận Tạo Đơn Hàng' }}</span>
           </button>
         </div>
 
@@ -170,8 +303,8 @@
     <Transition name="toast-fade">
       <div 
         v-if="toastState.show" 
-        class="fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50 text-sm font-medium text-white transition-all"
-        :class="toastState.type === 'error' ? 'bg-red-600' : (toastState.type === 'warning' ? 'bg-amber-500' : 'bg-slate-800')"
+        class="fixed bottom-6 right-6 px-5 py-3 rounded-xl shadow-xl flex items-center gap-2.5 z-50 text-sm font-semibold text-white transition-all"
+        :class="toastState.type === 'error' ? 'bg-rose-600' : (toastState.type === 'warning' ? 'bg-amber-500' : 'bg-slate-800')"
       >
         <span>{{ toastState.message }}</span>
       </div>
@@ -263,7 +396,7 @@ const addVariantToCart = (prod, variant) => {
       quantity: 1,
       max_stock: variant.stock_quantity
     })
-    toast.success('Đã thêm vào giỏ!')
+    toast.success('Đã thêm sản phẩm!')
   }
   searchQuery.value = ''
   searchResults.value = []
@@ -310,8 +443,8 @@ const submitOrder = async () => {
     }
 
     if (payload.payment_method === 'cod') {
-        payload.status = 'pending'
-        payload.payment_status = 'unpaid'
+      payload.status = 'pending'
+      payload.payment_status = 'unpaid'
     }
 
     await http.post('/admin/orders', payload)
@@ -324,13 +457,20 @@ const submitOrder = async () => {
   }
 }
 </script>
+
 <style scoped>
-.toast-fade-enter-active,
-.toast-fade-leave-active {
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.toast-fade-enter-active, .toast-fade-leave-active {
   transition: all 0.3s ease;
 }
-.toast-fade-enter-from,
-.toast-fade-leave-to {
+.toast-fade-enter-from, .toast-fade-leave-to {
   opacity: 0;
   transform: translateY(20px);
 }
