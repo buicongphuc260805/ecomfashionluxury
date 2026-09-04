@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
@@ -73,6 +74,42 @@ class UploadController extends Controller
         $filename = Str::uuid().'.'.$extension;
 
         try {
+            $cloudName = env('CLOUDINARY_CLOUD_NAME');
+            $apiKey = env('CLOUDINARY_API_KEY');
+            $apiSecret = env('CLOUDINARY_API_SECRET');
+
+            // ── Nếu có cấu hình Cloudinary ─────────────────────────────────────────
+            if (! empty($cloudName) && ! empty($apiKey) && ! empty($apiSecret)) {
+                $timestamp = time();
+                $folderPath = "ecom_fashion/{$folder}";
+                $strToSign = "folder={$folderPath}&timestamp={$timestamp}{$apiSecret}";
+                $signature = sha1($strToSign);
+
+                $response = Http::attach(
+                    'file',
+                    file_get_contents($file->getRealPath()),
+                    $file->getClientOriginalName()
+                )->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", [
+                    'api_key' => $apiKey,
+                    'timestamp' => $timestamp,
+                    'folder' => $folderPath,
+                    'signature' => $signature,
+                ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+
+                    return response()->json([
+                        'success' => true,
+                        'url' => $data['secure_url'],
+                        'path' => $data['public_id'],
+                    ], 201);
+                }
+
+                throw new \Exception('Cloudinary upload error: '.$response->body());
+            }
+
+            // ── Mặc định dùng Local / S3 storage ────────────────────────────────────
             $disk = config('filesystems.default', 'public');
 
             $path = $file->storeAs(
@@ -85,13 +122,12 @@ class UploadController extends Controller
                 throw new \Exception('Không thể ghi file vào storage.');
             }
 
-            // Dùng Storage::disk()->url() hỗ trợ cả Local Storage lẫn Cloudflare R2 / AWS S3
             $url = Storage::disk($disk)->url($path);
 
             return response()->json([
                 'success' => true,
                 'url' => $url,
-                'path' => $path,   // đường dẫn tương đối (để xóa sau nếu cần)
+                'path' => $path,
             ], 201);
         } catch (\Exception $e) {
             \Log::error('Lỗi upload image: '.$e->getMessage());
@@ -150,7 +186,29 @@ class UploadController extends Controller
 
         $path = $request->input('path');
 
-        // Bảo vệ: chỉ cho phép xóa trong thư mục images/
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = env('CLOUDINARY_API_KEY');
+        $apiSecret = env('CLOUDINARY_API_SECRET');
+
+        if (! empty($cloudName) && ! empty($apiKey) && ! empty($apiSecret) && ! str_starts_with($path, 'images/')) {
+            $timestamp = time();
+            $strToSign = "public_id={$path}&timestamp={$timestamp}{$apiSecret}";
+            $signature = sha1($strToSign);
+
+            Http::post("https://api.cloudinary.com/v1_1/{$cloudName}/image/destroy", [
+                'api_key' => $apiKey,
+                'public_id' => $path,
+                'timestamp' => $timestamp,
+                'signature' => $signature,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã xóa ảnh Cloudinary thành công.',
+            ]);
+        }
+
+        // Bảo vệ: chỉ cho phép xóa trong thư mục images/ với local storage
         if (! str_starts_with($path, 'images/')) {
             return response()->json([
                 'success' => false,
