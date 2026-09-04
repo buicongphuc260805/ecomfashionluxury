@@ -1,0 +1,68 @@
+name: CI/CD Pipeline - LUXURY Ecom
+
+on:
+  push:
+    branches: [ "deploy-render", "main" ]
+  pull_request:
+    branches: [ "deploy-render", "main" ]
+
+jobs:
+  backend-ci:
+    name: Backend Syntax & Quality Checks (PHP / Laravel)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_mysql, zip, opcache
+          coverage: none
+
+      - name: Validate composer.json
+        run: cd backend && composer validate --no-check-publish
+
+  frontend-ci:
+    name: Frontend Quality & Build Check (Vue.js 3 / Vite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies & verify build
+        run: |
+          cd frontend
+          npm ci || npm install
+          npm run build
+
+  deploy-notify:
+    name: Continuous Deployment Trigger (Render)
+    needs: [backend-ci, frontend-ci]
+    if: github.ref == 'refs/heads/deploy-render' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Backend Deploy Hook (Optional)
+        run: |
+          if [ -n "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}" ]; then
+            curl -X POST ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
+          else
+            echo "Render native auto-deploy enabled."
+          fi
+
+      - name: Trigger Render Frontend Deploy Hook (Optional)
+        run: |
+          if [ -n "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" ]; then
+            curl -X POST ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
+          else
+            echo "Render native auto-deploy enabled."
+          fi

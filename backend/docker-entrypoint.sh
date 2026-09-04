@@ -15,8 +15,9 @@ chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
 php artisan storage:link 2>/dev/null || true
 
-echo "🗄️  [entrypoint] Running migrations..."
+echo "🗄️  [entrypoint] Running migrations & seeders..."
 php artisan migrate --force --no-interaction
+php artisan db:seed --force --no-interaction
 
 php artisan config:cache
 php artisan route:cache
