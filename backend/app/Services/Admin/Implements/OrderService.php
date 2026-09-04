@@ -144,6 +144,29 @@ class OrderService implements OrderServiceInterface
             $oldStatus = $model->status;
             $newStatus = $data['status'] ?? $oldStatus;
 
+            // 1. Kiểm tra trạng thái đã đóng (Terminal statuses)
+            if ($oldStatus === 'completed' && $newStatus !== 'completed') {
+                throw new Exception("Đơn hàng đã giao thành công (Hoàn thành), không thể thay đổi sang trạng thái khác.");
+            }
+
+            if ($oldStatus === 'cancelled' && $newStatus !== 'cancelled') {
+                throw new Exception("Đơn hàng đã bị hủy, không thể thay đổi sang trạng thái khác.");
+            }
+
+            // 2. Kiểm tra quy trình một chiều (Không cho phép lùi trạng thái)
+            if ($oldStatus === 'confirmed' && $newStatus === 'pending') {
+                throw new Exception("Đơn hàng đã xác nhận, không thể quay lại trạng thái Chờ xử lý.");
+            }
+
+            if ($oldStatus === 'shipping' && in_array($newStatus, ['pending', 'confirmed'])) {
+                throw new Exception("Đơn hàng đang giao, không thể quay lại trạng thái trước đó.");
+            }
+
+            // 3. Tự động chuyển trạng thái thanh toán sang 'paid' khi đơn hoàn thành
+            if ($newStatus === 'completed' && (!isset($data['payment_status']) || $data['payment_status'] === 'unpaid')) {
+                $data['payment_status'] = 'paid';
+            }
+
             // Load details for stock logic if not loaded
             $model->load('details.productVariant');
 

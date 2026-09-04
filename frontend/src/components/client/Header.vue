@@ -2,24 +2,32 @@
   <div :class="wrapperClass">
     <!-- Top Bar -->
     <div
-      class="bg-black text-white flex justify-between items-center px-5 lg:px-20 text-[11px] font-text tracking-[0.5px] transition-all duration-500 ease-in-out overflow-hidden max-lg:flex-col max-lg:gap-2.5"
+      class="bg-black text-white px-5 lg:px-20 text-[11px] font-text tracking-[0.5px] transition-all duration-500 ease-in-out overflow-hidden"
       :class="topBarClass"
     >
-      <div class="flex gap-5 items-center">
-        <router-link to="/profile/orders" class="text-white no-underline font-semibold cursor-pointer">THEO DÕI ĐƠN HÀNG</router-link>
-        <a href="#" @click.prevent="handleAccountClick" class="text-white no-underline font-semibold cursor-pointer">TÀI KHOẢN CỦA TÔI</a>
-        <router-link to="/about" class="text-white no-underline font-semibold cursor-pointer">VỀ CHÚNG TÔI</router-link>
-      </div>
-      <div class="text-center max-lg:order-first">
-        <span class="text-white font-semibold">GIẢM GIÁ MÙA HÈ CHO TẤT CẢ ĐỒ BƠI VÀ MIỄN PHÍ GIAO HÀNG QUỐC TẾ TỐC ĐỘ CAO</span>
-      </div>
-      <div class="flex gap-5 items-center">
-        <router-link to="/contact" class="text-white no-underline font-semibold cursor-pointer">LIÊN HỆ</router-link>
-        <!-- <div class="flex items-center gap-1.25">
-          <span class="text-white font-semibold cursor-pointer">TIẾNG VIỆT <i class="border-solid border-white border-r border-b inline-block p-[2.5px] rotate-45 ml-1.25 mb-[2px]"></i></span>
-        </div> -->
-        <div class="flex items-center gap-1.25">
-          <span class="text-white font-semibold cursor-pointer">VND <i class="border-solid border-white border-r border-b inline-block p-[2.5px] rotate-45 ml-1.25 mb-[2px]"></i></span>
+      <div class="grid grid-cols-1 lg:grid-cols-3 items-center w-full max-lg:flex max-lg:flex-col max-lg:gap-2">
+        <!-- Cột Trái -->
+        <div class="flex gap-4 items-center justify-start max-lg:justify-center">
+          <span class="text-neutral-300 flex items-center gap-1.5 font-medium">
+            <svg class="w-3 h-3 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            Hotline: <strong class="text-white font-semibold">1900 6868</strong>
+          </span>
+          <span class="text-neutral-600 max-lg:hidden">|</span>
+          <router-link to="/about" class="text-neutral-300 hover:text-white no-underline font-semibold cursor-pointer transition-colors max-lg:hidden">VỀ CHÚNG TÔI</router-link>
+        </div>
+
+        <!-- Cột Giữa -->
+        <div class="text-center max-lg:order-first">
+          <span class="text-white font-semibold tracking-wide uppercase">THỜI TRANG CÔNG SỞ LỊCH LÃM HIỆN ĐẠI CÙNG LUXURY ECOMFASHION</span>
+        </div>
+
+        <!-- Cột Phải -->
+        <div class="flex gap-4 items-center justify-end max-lg:justify-center">
+          <router-link to="/profile/orders" class="text-neutral-300 hover:text-white no-underline font-semibold cursor-pointer transition-colors">THEO DÕI ĐƠN HÀNG</router-link>
+          <span class="text-neutral-600">|</span>
+          <router-link to="/contact" class="text-neutral-300 hover:text-white no-underline font-semibold cursor-pointer transition-colors">LIÊN HỆ</router-link>
         </div>
       </div>
     </div>
@@ -167,7 +175,7 @@
           </button>
           <!-- Notification Dropdown Component -->
           <NotificationDropdown
-            :is-open="isNotificationOpen"
+          :is-open="isNotificationOpen"
             @close="isNotificationOpen = false"
             @mouseenter="clearNotificationTimeout"
             @mouseleave="closeNotificationDropdown"

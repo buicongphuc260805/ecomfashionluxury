@@ -84,14 +84,14 @@
         <table class="w-full text-sm">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-100">
-              <th class="py-3.5 px-5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-[80px]">ID</th>
-              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Sản phẩm</th>
-              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Thương hiệu</th>
-              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Danh mục</th>
-              <th class="py-3.5 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Tồn Kho tổng</th>
-              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
-              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày tạo</th>
-              <th class="py-3.5 px-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider w-[110px]">Thao tác</th>
+              <th class="py-3.5 px-5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-[80px] whitespace-nowrap">ID</th>
+              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Sản phẩm</th>
+              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Thương hiệu</th>
+              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Danh mục</th>
+              <th class="py-3.5 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Tồn Kho tổng</th>
+              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Trạng thái</th>
+              <th class="py-3.5 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Ngày tạo</th>
+              <th class="py-3.5 px-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider w-[110px] whitespace-nowrap">Thao tác</th>
             </tr>
           </thead>
             <template v-if="productStore.loading">
@@ -126,7 +126,7 @@
               <tbody class="divide-y divide-slate-50">
               <tr v-for="product in productStore.products" :key="product.id"
                 class="hover:bg-neutral-100/40 transition-colors duration-100">
-                <td class="py-4 px-5 font-mono text-xs text-slate-500">
+                <td class="py-4 px-5 font-mono text-xs text-slate-500 whitespace-nowrap">
                   #{{ product.id }}
                 </td>
                 <td class="py-4 px-4">
@@ -140,32 +140,32 @@
                     </div>
                   </div>
                 </td>
-                <td class="py-4 px-4 text-slate-700 font-medium text-sm">{{ product.brand }}</td>
-                <td class="py-4 px-4">
-                  <span class="inline-block bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-lg">
+                <td class="py-4 px-4 text-slate-700 font-medium text-sm whitespace-nowrap">{{ product.brand }}</td>
+                <td class="py-4 px-4 whitespace-nowrap">
+                  <span class="inline-block bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-lg whitespace-nowrap">
                     {{ categoryStore.categories.find(cate => cate.id === product.category_id)?.name || 'Chưa phân loại' }}
                   </span>
                 </td>
-                <td class="py-4 px-4 text-center">
+                <td class="py-4 px-4 text-center whitespace-nowrap">
                   <span class="text-slate-800 font-semibold">
                     {{ getProductStock(product) }}
                   </span>
                 </td>
-                <td class="py-4 px-4">
+                <td class="py-4 px-4 whitespace-nowrap">
                   <span
                     :class="product.is_active
                       ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
                       : 'bg-slate-100 text-slate-500 border-slate-200'"
-                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border"
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap shrink-0"
                   >
-                    <span :class="product.is_active ? 'bg-emerald-500' : 'bg-slate-400'" class="w-1.5 h-1.5 rounded-full"></span>
-                    {{ product.is_active ? 'Active' : 'Inactive' }}
+                    <span :class="product.is_active ? 'bg-emerald-500' : 'bg-slate-400'" class="w-1.5 h-1.5 rounded-full shrink-0"></span>
+                    {{ product.is_active ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
                   </span>
                 </td>
-                <td class="py-4 px-4 text-slate-500 text-sm">
+                <td class="py-4 px-4 text-slate-500 text-sm whitespace-nowrap">
                   {{ formatDateOnly(product.created_at) }}
                 </td>
-                <td class="py-4 px-4">
+                <td class="py-4 px-4 whitespace-nowrap">
                   <div class="flex items-center justify-end gap-1">
                     <button 
                       @click="openDetail(product)"
@@ -253,6 +253,7 @@ import  Pagination from '@/components/admin/Pagination.vue'
 import  ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal.vue'
 import  ProductDetailModal from '@/components/admin/product/ProductDetailModal.vue';
 import  ProductFormModal from '@/components/admin/product/ProductFormModal.vue';
+import { formatDate } from '@/utils/format.js';
 
 const productStore = useProductStore();
 const categoryStore = useCategoryStore();
@@ -285,8 +286,7 @@ onMounted(async () => {
 });
 
 const formatDateOnly = (dateString) => {
-  if (!dateString) return 'N/A';
-  return new Date(dateString).toLocaleDateString('vi-VN'); 
+  return formatDate(dateString) || 'N/A';
 };
 
 // Tính tổng tồn kho của sản phẩm từ tất cả biến thể

@@ -1,4 +1,5 @@
 <template>
+  <div class="space-y-6">
     <!-- ══════════════════════ PAGE HEADER ══════════════════════ -->
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
@@ -220,12 +221,19 @@
                   </svg>
                 </button>
                 <button 
+                  @click="cloneReceipt(receipt)"
+                  class="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-150" title="Sao chép tạo phiếu mới">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+                <button 
                   v-if="receipt.status !== 'cancel' && receipt.status !== 'completed'"
                   @click="isShowUpdate = true; selectedReceipt = receipt"
                   class="p-2 rounded-lg text-slate-400 hover:text-black hover:bg-neutral-100 transition-all duration-150" title="Chỉnh sửa">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </button>
                 <button
@@ -270,7 +278,8 @@
       v-if="isShowAdd"
       :isShowAdd="isShowAdd"
       :supplierList="suppliers"
-      @close="isShowAdd = false"
+      :initialData="cloneReceiptData"
+      @close="isShowAdd = false; cloneReceiptData = null"
       @onHandleSave="handleSave"
     />
 
@@ -289,7 +298,7 @@
       :receipt="selectedReceipt"
       @close="isShowView = false"
     />
-
+  </div>
 </template>
 <script setup>
 import GoodsReceiptAddModal from '@/components/admin/goodsReceipts/GoodsReceiptAddModal.vue';
@@ -301,6 +310,7 @@ import { useGoodsReceiptStore } from '@/stores/admin/goodsReceiptStore.js';
 import { useSupplierStore } from '@/stores/admin/supplierStore';
 import { useProductStore } from '@/stores/admin/productStore.js';
 import { ref, onMounted, computed } from 'vue';
+import { formatDate } from '@/utils/format.js';
 const supplierStore = useSupplierStore();
 const productStore = useProductStore();
 const suppliers = ref([]);
@@ -347,11 +357,8 @@ const helperFormatCurrency = (value) => {
   }).format(numericValue);
 };
 
-// format ngày tháng
-const helperFomatDate = (dateString) => {
-  if (!dateString) return '';
-  return dateString.split(' ')[0];
-};
+// format ngày tháng - dùng formatDate từ utils/format.js
+const helperFomatDate = formatDate;
 
 // tìm tên nhà cung cấp theo id
 const findSupplierNameById = (supplierId) => {
@@ -360,8 +367,15 @@ const findSupplierNameById = (supplierId) => {
 };
 
 const selectedReceipt = ref(null);
+const cloneReceiptData = ref(null);
 const isShowView = ref(false);
 const isShowAdd = ref(false);
+
+const cloneReceipt = (receipt) => {
+  cloneReceiptData.value = receipt;
+  isShowAdd.value = true;
+};
+
 const handleSave = async (receiptData, applyBackendErrors) => {
   try {
     await goodsReceiptStore.createGoodsReceipt(receiptData);

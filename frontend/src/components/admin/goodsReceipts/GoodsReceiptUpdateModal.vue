@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <!-- Modal Backdrop & Container -->
   <div class="fixed inset-0 z-[9998] flex items-center justify-center p-4"
        :class=" isShowUpdate ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'">
@@ -49,15 +49,16 @@
             <label class="block text-xs font-bold text-slate-700 mb-1.5">Trạng thái phiếu</label>
             <select 
               v-model="updatedReceipt.status"
-              class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl text-slate-700 bg-slate-50 focus:bg-white focus:border-black focus:ring-4 focus:ring-black/10 focus:outline-none transition-all duration-200">
-              <option value="pending">Đang chờ duyệt</option>
-              <option value="approved">Đã duyệt</option>
-              <option value="completed">Đã hoàn thành</option>
-              <option value="cancel">Đã huỷ</option>
+              :disabled="isStatusLocked"
+              class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl text-slate-700 bg-slate-50 focus:bg-white focus:border-black focus:ring-4 focus:ring-black/10 focus:outline-none transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
+              <option v-for="opt in availableStatusOptions" :key="opt.value" :value="opt.value">
+                {{ opt.label }}
+              </option>
             </select>
             <span v-if="errors.status" class="text-xs text-red-500 mt-1 block">{{ errors.status }}</span>
           </div>
         </div>
+
 
         <!-- Product list (edit) -->
         <div>
@@ -192,7 +193,7 @@
 </template>
 
 <script setup>
-  import { ref, watch, onMounted, defineProps, defineEmits } from 'vue';
+  import { ref, watch, onMounted, computed, defineProps, defineEmits } from 'vue';
   import { useProductVariantStore } from '@/stores/admin/productVariantStore'
   import { useGoodsReceiptValidation } from '@/composables/admin/validation/useGoodsReceiptValidation';
 
@@ -227,6 +228,47 @@
   });
 
   const goodsReceiptDetails = ref([]);
+
+  // Kiểm tra trạng thái có bị khóa hoàn toàn hay không
+  const isStatusLocked = computed(() => {
+    return ['completed', 'cancel'].includes(props.receipt?.status);
+  });
+
+  // Tùy chọn trạng thái hợp lệ theo luồng 1 chiều
+  const availableStatusOptions = computed(() => {
+    const current = props.receipt?.status;
+    if (current === 'pending') {
+      return [
+        { value: 'pending', label: 'Đang chờ duyệt' },
+        { value: 'approved', label: 'Đã duyệt' },
+        { value: 'completed', label: 'Đã hoàn thành' },
+        { value: 'cancel', label: 'Đã huỷ' },
+      ];
+    }
+    if (current === 'approved') {
+      return [
+        { value: 'approved', label: 'Đã duyệt' },
+        { value: 'completed', label: 'Đã hoàn thành' },
+        { value: 'cancel', label: 'Đã huỷ' },
+      ];
+    }
+    if (current === 'completed') {
+      return [
+        { value: 'completed', label: 'Đã hoàn thành' },
+      ];
+    }
+    if (current === 'cancel') {
+      return [
+        { value: 'cancel', label: 'Đã huỷ' },
+      ];
+    }
+    return [
+      { value: 'pending', label: 'Đang chờ duyệt' },
+      { value: 'approved', label: 'Đã duyệt' },
+      { value: 'completed', label: 'Đã hoàn thành' },
+      { value: 'cancel', label: 'Đã huỷ' },
+    ];
+  });
 
   onMounted(() => {
     if (props.receipt) {
@@ -311,6 +353,7 @@
     if (!validate(updatedReceipt.value)) {
       return;
     }
+
 
     isSubmitting.value = true;
     try {

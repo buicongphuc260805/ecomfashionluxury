@@ -55,7 +55,7 @@
     
     <div class="flex justify-between items-center border-t border-[#222] pt-[30px] text-[12px] text-[#888] max-sm:flex-col max-sm:gap-5 max-sm:text-center">
       <div>
-        Copyright 2026 © EcomFashion Theme. All right reserved.
+        Ecomfashion được phát triển bởi PhucDev © 2026
       </div>
       <div class="flex gap-[15px]">
          <span class="font-semibold text-[#aaa]">Mastercard</span>

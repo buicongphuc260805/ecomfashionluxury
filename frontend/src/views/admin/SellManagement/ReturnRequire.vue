@@ -132,17 +132,16 @@
 
       <!-- Data Table -->
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[1050px]">
+        <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              <th class="py-3.5 px-5 whitespace-nowrap">Mã Yêu Cầu</th>
-              <th class="py-3.5 px-5 whitespace-nowrap">Mã Đơn Hàng</th>
-              <th class="py-3.5 px-5 whitespace-nowrap">Khách Hàng</th>
-              <th class="py-3.5 px-5 whitespace-nowrap">Sản Phẩm Trả</th>
-              <th class="py-3.5 px-5 whitespace-nowrap">Lý Do Trả Hàng</th>
-              <th class="py-3.5 px-5 whitespace-nowrap">Tiền Hoàn Dự Kiến</th>
-              <th class="py-3.5 px-5 whitespace-nowrap">Trạng Thái</th>
-              <th class="py-3.5 px-5 text-right whitespace-nowrap">Thao Tác</th>
+              <th class="py-3 px-4 whitespace-nowrap">Mã / Đơn hàng</th>
+              <th class="py-3 px-4 whitespace-nowrap">Khách Hàng</th>
+              <th class="py-3 px-4 whitespace-nowrap">Sản Phẩm Trả</th>
+              <th class="py-3 px-4 whitespace-nowrap">Lý Do</th>
+              <th class="py-3 px-4 whitespace-nowrap">Hoàn Tiền</th>
+              <th class="py-3 px-4 whitespace-nowrap">Trạng Thái</th>
+              <th class="py-3 px-4 text-right whitespace-nowrap">Chi tiết</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-xs relative">
@@ -158,72 +157,58 @@
               </td>
             </tr>
             <tr v-else v-for="item in filteredRequests" :key="item.id" class="hover:bg-slate-50/80 transition-colors">
-              <!-- Return Ticket Code -->
-              <td class="py-4 px-5 font-bold text-slate-800 font-mono whitespace-nowrap">
-                {{ item.ticket_code }}
-                <span class="block text-[10px] font-normal text-slate-400 mt-0.5">{{ item.created_at }}</span>
-              </td>
-
-              <!-- Order Code -->
-              <td class="py-4 px-5 font-semibold text-slate-800 font-mono whitespace-nowrap">
-                {{ item.order_code || 'N/A' }}
+              <!-- Mã + Đơn hàng (gộp 1 cột) -->
+              <td class="py-3 px-4 whitespace-nowrap">
+                <p class="font-bold text-slate-800 font-mono text-xs">{{ item.ticket_code }}</p>
+                <p class="text-[11px] text-slate-400 font-mono mt-0.5">{{ item.order_code || 'N/A' }}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">{{ formatDate(item.created_at) }}</p>
               </td>
 
               <!-- Customer Info -->
-              <td class="py-4 px-5 whitespace-nowrap">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs shrink-0">
-                    {{ item.customer_name ? item.customer_name.charAt(0) : 'K' }}
-                  </div>
-                  <div>
-                    <p class="font-bold text-slate-800">{{ item.customer_name }}</p>
-                    <p class="text-[11px] text-slate-400 font-mono">{{ item.customer_phone }}</p>
-                  </div>
-                </div>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <p class="font-bold text-slate-800 text-xs">{{ item.customer_name }}</p>
+                <p class="text-[11px] text-slate-400 font-mono">{{ item.customer_phone }}</p>
               </td>
 
               <!-- Product Info -->
-              <td class="py-4 px-5 max-w-[220px]">
-                <div class="flex items-center gap-2.5">
-                  <img v-if="item.product_image" :src="item.product_image" :alt="item.product_name" class="w-10 h-12 object-cover rounded-lg border border-slate-200 shrink-0" />
+              <td class="py-3 px-4 max-w-[200px]">
+                <div class="flex items-center gap-2">
+                  <img v-if="item.product_image" :src="item.product_image" :alt="item.product_name" class="w-8 h-10 object-cover rounded border border-slate-200 shrink-0" />
                   <div class="truncate">
-                    <p class="font-semibold text-slate-800 truncate" :title="item.product_name">{{ item.product_name }}</p>
-                    <p class="text-[11px] text-slate-400">Size: {{ item.variant_size }} | Màu: {{ item.variant_color }} (x{{ item.quantity }})</p>
+                    <p class="font-semibold text-slate-800 truncate text-xs" :title="item.product_name">{{ item.product_name }}</p>
+                    <p class="text-[11px] text-slate-400">{{ item.variant_size }} | {{ item.variant_color }} (x{{ item.quantity }})</p>
                   </div>
                 </div>
               </td>
 
               <!-- Reason -->
-              <td class="py-4 px-5 whitespace-nowrap">
-                <span class="inline-block px-2.5 py-1 bg-slate-100 text-slate-700 font-semibold rounded-md text-[11px]">
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-block px-2 py-0.5 bg-slate-100 text-slate-700 font-semibold rounded text-[11px]">
                   {{ getReasonLabel(item.reason) }}
                 </span>
-                <p v-if="item.customer_note" class="text-[11px] text-slate-500 mt-1 line-clamp-1 italic max-w-[180px]">"{{ item.customer_note }}"</p>
               </td>
 
               <!-- Refund Value -->
-              <td class="py-4 px-5 font-bold text-emerald-700 font-mono text-sm whitespace-nowrap">
+              <td class="py-3 px-4 font-bold text-emerald-700 font-mono text-xs whitespace-nowrap">
                 {{ formatPrice(item.refund_amount) }} đ
               </td>
 
               <!-- Status Badge -->
-              <td class="py-4 px-5 whitespace-nowrap">
-                <span :class="getStatusBadgeClass(item.status)" class="px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide inline-flex items-center gap-1.5 whitespace-nowrap">
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span :class="getStatusBadgeClass(item.status)" class="px-2 py-0.5 rounded-full text-[11px] font-bold inline-flex items-center gap-1 whitespace-nowrap">
                   <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="getStatusDotClass(item.status)"></span>
                   {{ getStatusLabel(item.status) }}
                 </span>
               </td>
 
-              <!-- Action buttons -->
-              <td class="py-4 px-5 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <button
-                    @click="openModal(item)"
-                    class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-colors whitespace-nowrap"
-                  >
-                    Chi tiết
-                  </button>
-                </div>
+              <!-- Action -->
+              <td class="py-3 px-4 text-right whitespace-nowrap">
+                <button
+                  @click="openModal(item)"
+                  class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-colors"
+                >
+                  Chi tiết
+                </button>
               </td>
             </tr>
 
@@ -252,7 +237,7 @@
           <div class="p-4 rounded-xl flex items-center justify-between border" :class="getStatusBannerClass(selectedRequest.status)">
             <div>
               <p class="font-bold text-sm">Trạng thái: {{ getStatusLabel(selectedRequest.status) }}</p>
-              <p class="text-[11px] opacity-80 mt-0.5">Ngày gửi yêu cầu: {{ selectedRequest.created_at }}</p>
+              <p class="text-[11px] opacity-80 mt-0.5">Ngày gửi yêu cầu: {{ formatDate(selectedRequest.created_at) }}</p>
             </div>
             <span class="text-xs font-mono font-bold bg-white/80 backdrop-blur-sm px-2.5 py-1 rounded border border-slate-200 text-slate-800">Mã Đơn: {{ selectedRequest.order_code || 'N/A' }}</span>
           </div>
@@ -404,6 +389,7 @@
 <script setup>
 import { useReturnStore } from '@/stores/admin/returnStore'
 import { ref, computed, onMounted, watch } from 'vue'
+import { formatDate } from '@/utils/format.js'
 
 const returnStore = useReturnStore()
 const searchQuery = ref('')

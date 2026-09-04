@@ -144,7 +144,7 @@
             <div>
               <label class="block text-gray-700 font-medium mb-1">Trạng thái thanh toán</label>
               <select v-model="order.payment_status" class="w-full border p-2 rounded focus:outline-none focus:border-black bg-white">
-                <option value="pending">Chưa thanh toán</option>
+                <option value="unpaid">Chưa thanh toán</option>
                 <option value="paid">Đã thanh toán</option>
               </select>
             </div>
@@ -311,7 +311,7 @@ const submitOrder = async () => {
 
     if (payload.payment_method === 'cod') {
         payload.status = 'pending'
-        payload.payment_status = 'pending'
+        payload.payment_status = 'unpaid'
     }
 
     await http.post('/admin/orders', payload)

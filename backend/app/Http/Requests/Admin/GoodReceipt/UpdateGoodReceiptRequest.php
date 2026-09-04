@@ -17,9 +17,15 @@ class UpdateGoodReceiptRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $receipt = $this->route('goods_receipt') ?? $this->route('good_receipt');
+            if (is_numeric($receipt)) {
+                $receipt = GoodReceipt::find($receipt);
+            }
             if ($receipt instanceof GoodReceipt) {
                 if (in_array($receipt->status, ['cancel', 'completed'])) {
                     $validator->errors()->add('status', 'Không thể cập nhật phiếu nhập đã bị hủy hoặc đã hoàn thành.');
+                }
+                if ($receipt->status === 'approved' && $this->input('status') === 'pending') {
+                    $validator->errors()->add('status', 'Không thể chuyển phiếu đã duyệt quay lại trạng thái Chờ duyệt.');
                 }
             }
         });

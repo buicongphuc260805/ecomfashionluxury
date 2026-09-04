@@ -1,11 +1,7 @@
 #!/bin/bash
-# Không dùng set -e để tránh container exit + crash-loop khi có lệnh lỗi nhỏ
+echo "🚀 [entrypoint] Starting backend (production)..."
 
-echo "🚀 [entrypoint] Starting backend setup..."
-
-# ── Ensure required directories exist ────────────────────────────────
-mkdir -p database \
-         storage/logs \
+mkdir -p storage/logs \
          storage/framework/cache \
          storage/framework/sessions \
          storage/framework/views \
@@ -15,28 +11,17 @@ mkdir -p database \
          storage/api-docs \
          bootstrap/cache
 
-# ── Fix permissions (bỏ qua lỗi trên Windows Docker volume mounts) ───
-chmod -R 777 storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
-# ── Composer install: chỉ chạy khi vendor trống ─────────────────────
-if [ ! -f "vendor/autoload.php" ]; then
-    echo "📦 [entrypoint] vendor/ not found — running composer install..."
-    composer install --no-interaction --prefer-dist --optimize-autoloader || true
-else
-    echo "✅ [entrypoint] vendor/ already exists — skipping composer install"
-fi
-
-# ── Storage link ─────────────────────────────────────────────────────
+php artisan key:generate --force --no-interaction 2>/dev/null || true
 php artisan storage:link 2>/dev/null || true
 
-# ── Swagger (bỏ qua nếu lỗi) ────────────────────────────────────────
-php artisan l5-swagger:generate 2>/dev/null || true
+echo "🗄️  [entrypoint] Running migrations..."
+php artisan migrate --force --no-interaction
 
-# ── Config & route cache (dev-friendly: clear trước) ─────────────────
-php artisan config:clear 2>/dev/null || true
-php artisan route:clear 2>/dev/null || true
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
-echo "✅ [entrypoint] Setup complete! Starting server..."
-
-# ── Chạy CMD ─────────────────────────────────────────────────────────
+echo "✅ [entrypoint] Setup complete! Starting server on port ${PORT:-8000}..."
 exec "$@"

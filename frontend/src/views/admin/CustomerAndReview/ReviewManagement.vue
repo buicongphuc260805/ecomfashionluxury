@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="space-y-6 font-text text-slate-800">
     <!-- Page Header -->
     <div class="flex items-center justify-between flex-wrap gap-4">
@@ -114,25 +114,20 @@
               <th class="py-3.5 px-5">Đánh Giá</th>
               <th class="py-3.5 px-5">Bình Luận</th>
               <th class="py-3.5 px-5">Thời Gian</th>
-              <th class="py-3.5 px-5 text-right">Hành Động</th>
+
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-xs">
             <tr v-for="item in reviewStore.reviews" :key="item.id" class="hover:bg-slate-50/80 transition-colors">
               <!-- Customer info -->
               <td class="py-4 px-5">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 shrink-0 uppercase border border-slate-200">
-                    {{ item.customer ? item.customer.first_name.charAt(0) : 'K' }}
-                  </div>
-                  <div>
-                    <p class="font-bold text-slate-800">
-                      {{ item.customer ? `${item.customer.first_name} ${item.customer.last_name}` : 'Ẩn danh' }}
-                    </p>
-                    <p class="text-[11px] text-slate-400 font-mono">
-                      {{ item.customer ? item.customer.email : 'customer@ecom.com' }}
-                    </p>
-                  </div>
+                <div>
+                  <p class="font-bold text-slate-800">
+                    {{ item.customer ? `${item.customer.first_name} ${item.customer.last_name}` : 'Ẩn danh' }}
+                  </p>
+                  <p class="text-[11px] text-slate-400 font-mono">
+                    {{ item.customer ? item.customer.email : 'customer@ecom.com' }}
+                  </p>
                 </div>
               </td>
 
@@ -174,18 +169,7 @@
                 {{ formatDateTime(item.created_at) }}
               </td>
 
-              <!-- Action triggers -->
-              <td class="py-4 px-5 text-right">
-                <button
-                  @click="confirmDelete(item)"
-                  class="p-2 text-rose-500 hover:text-white hover:bg-rose-500 rounded-lg transition-colors inline-flex items-center justify-center cursor-pointer border-none bg-transparent active:scale-95"
-                  title="Xóa đánh giá"
-                >
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
-                  </svg>
-                </button>
-              </td>
+
             </tr>
 
             <!-- Empty reviews -->

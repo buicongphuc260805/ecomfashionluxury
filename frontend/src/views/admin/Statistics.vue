@@ -69,7 +69,7 @@
       >
         <div class="flex items-start justify-between">
           <div :class="`w-11 h-11 rounded-xl flex items-center justify-center ${kpi.iconBg}`">
-            <component :is="kpi.icon" class="w-5 h-5" :class="kpi.iconColor" />
+            <span :class="kpi.iconColor" class="w-5 h-5 flex items-center justify-center" v-html="kpi.icon"></span>
           </div>
           <span
             :class="[
@@ -581,7 +581,7 @@ const kpiCards = computed(() => {
       change:    ov.revenue_change_percent,
       iconBg:    'bg-blue-50',
       iconColor: 'text-black',
-      icon:      RevenueIcon,
+      icon:      `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
     },
     {
       key:       'orders',
@@ -590,7 +590,7 @@ const kpiCards = computed(() => {
       change:    ov.orders_change_percent,
       iconBg:    'bg-orange-50',
       iconColor: 'text-orange-500',
-      icon:      OrderIcon,
+      icon:      `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
     },
     {
       key:       'customers',
@@ -599,7 +599,7 @@ const kpiCards = computed(() => {
       change:    ov.customers_change_percent,
       iconBg:    'bg-emerald-50',
       iconColor: 'text-emerald-500',
-      icon:      CustomerIcon,
+      icon:      `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
     },
     {
       key:       'aov',
@@ -608,7 +608,7 @@ const kpiCards = computed(() => {
       change:    ov.aov_change_percent,
       iconBg:    'bg-indigo-50',
       iconColor: 'text-indigo-500',
-      icon:      AovIcon,
+      icon:      `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
     },
   ]
 })
@@ -657,7 +657,12 @@ function formatChartLabel(label) {
     const [y, m] = label.split('-')
     return `T${parseInt(m)}/${y.slice(2)}`
   }
-  return label.slice(5) // day: MM-DD
+  // Nếu là YYYY-MM-DD -> đổi thành DD/MM (ngày/tháng)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(label)) {
+    const [y, m, d] = label.split('-')
+    return `${d}/${m}`
+  }
+  return label
 }
 
 // ─── Donut Chart ─────────────────────────────────────────────────────────────

@@ -12,13 +12,13 @@
     </div>
 
     <!-- Banner Section -->
-    <div class="w-full aspect-[21/9] min-h-[350px] bg-gray-50 border border-gray-100 overflow-hidden mb-16 relative group">
+    <div class="w-full aspect-[21/9] min-h-[320px] bg-gray-50 border border-gray-100 overflow-hidden mb-16 relative group">
       <img 
-        src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop" 
+        src="/img/about/about.jpg" 
         alt="Về Luxury" 
-        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-103"
+        class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-103"
       >
-      <div class="absolute inset-0 bg-black/10 transition-opacity duration-500 group-hover:opacity-20"></div>
+      <div class="absolute inset-0 bg-black/5 transition-opacity duration-500 group-hover:opacity-15"></div>
     </div>
 
     <!-- Content Section -->
@@ -68,8 +68,8 @@
           </h3>
           <p class="text-[14px] text-gray-800 font-medium leading-relaxed">
             Luxury Flagship Store<br>
-            428 Soho Architecture Loft, NY 10012<br>
-            Điện thoại: +44 20 7946 0123
+            365/10 Nguyễn Thị Kiểu, Tân Thới Hiệp, Quận 12, TP. Hồ Chí Minh<br>
+            Hotline: 1900 6868
           </p>
         </div>
       </div>

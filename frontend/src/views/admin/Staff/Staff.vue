@@ -159,22 +159,16 @@
               <td class="py-4 px-5 font-mono text-xs text-slate-500">{{ staff.id }}</td>
 
               <td class="py-4 px-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
-                    <img v-if="staff.avatar" :src="staff.avatar" :alt="staff.full_name" class="w-full h-full object-cover" />
-                    <span v-else>{{ getInitials(staff.full_name) }}</span>
-                  </div>
-                  <div>
-                    <p class="font-semibold text-slate-800 leading-tight">{{ staff.full_name }}</p>
-                    <div v-if="staff.roles && staff.roles.length" class="flex flex-wrap gap-1 mt-1">
-                      <span
-                        v-for="role in staff.roles"
-                        :key="role.id"
-                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase"
-                      >
-                        {{ role.name }}
-                      </span>
-                    </div>
+                <div>
+                  <p class="font-semibold text-slate-800 leading-tight">{{ staff.full_name }}</p>
+                  <div v-if="staff.roles && staff.roles.length" class="flex flex-wrap gap-1 mt-1">
+                    <span
+                      v-for="role in staff.roles"
+                      :key="role.id"
+                      class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase"
+                    >
+                      {{ role.name }}
+                    </span>
                   </div>
                 </div>
               </td>
@@ -192,8 +186,8 @@
                 </span>
               </td>
 
-              <td class="py-4 px-4 text-xs text-slate-500">{{ staff.last_login_at || '—' }}</td>
-              <td class="py-4 px-4 text-xs text-slate-500">{{ staff.created_at || '—' }}</td>
+              <td class="py-4 px-4 text-xs text-slate-500">{{ formatDate(staff.last_login_at) || '—' }}</td>
+              <td class="py-4 px-4 text-xs text-slate-500">{{ formatDate(staff.created_at) || '—' }}</td>
 
               <td class="py-4 px-4">
                 <div class="flex items-center justify-end gap-1">
@@ -292,6 +286,7 @@ import Pagination from '@/components/admin/Pagination.vue'
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal.vue'
 import StaffFormModal from '@/components/admin/staff/StaffFormModal.vue'
 import StaffViewModal from '@/components/admin/staff/StaffViewModal.vue'
+import { formatDate } from '@/utils/format.js'
 
 const staffStore = useStaffStore()
 const roleStore = useRoleStore()

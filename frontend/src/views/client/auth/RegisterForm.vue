@@ -86,7 +86,7 @@
 
     <!-- Footer Consent -->
     <p class="text-[11px] text-neutral-455 leading-relaxed text-center mt-6 font-text">
-      Bằng cách tiếp tục, bạn chấp nhận Chính sách bảo mật và Điều khoản dịch vụ của NURFIA.
+      Bằng cách tiếp tục, bạn chấp nhận Chính sách bảo mật và Điều khoản dịch vụ của LUXURY.
     </p>
   </div>
 </template>

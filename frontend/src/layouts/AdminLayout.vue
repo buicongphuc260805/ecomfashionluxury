@@ -60,9 +60,9 @@
                 />
                 <span v-else>{{ getInitials(authStore.user?.full_name) || 'AD' }}</span>
               </div>
-              <div class="flex flex-col leading-tight">
-                <span class="text-[13px] font-bold text-slate-800">{{ authStore.user?.full_name || 'Admin' }}</span>
-                <span class="text-[11px] font-medium text-neutral-400">Quản trị</span>
+              <div class="flex flex-col leading-tight min-w-0">
+                <span class="text-[13px] font-bold text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">{{ authStore.user?.full_name || 'Admin' }}</span>
+                <span class="text-[11px] font-medium text-neutral-400 whitespace-nowrap">Quản trị</span>
               </div>
             </div>
 

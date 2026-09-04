@@ -2,13 +2,13 @@
   <div class="w-full bg-white text-black font-text">
     
     <!-- Background Banner -->
-    <div class="relative bg-[url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat py-24 flex flex-col items-center justify-center">
+    <div class="relative bg-[url('/img/contact/contact.jpg')] bg-cover bg-center bg-no-repeat py-24 flex flex-col items-center justify-center">
       <div class="absolute inset-0 bg-black/40"></div>
-      <h1 class="relative font-title text-[48px] md:text-[60px] font-bold text-white uppercase tracking-[1px] m-0 z-10 text-center drop-shadow-md">
+      <h1 class="relative font-title text-[40px] md:text-[56px] font-bold text-white uppercase tracking-[1px] m-0 z-10 text-center drop-shadow-md">
         LIÊN HỆ
       </h1>
-      <p class="relative text-[15px] md:text-[16px] text-white/90 leading-relaxed font-normal text-center mt-4 z-10 max-w-[800px] px-5">
-        Trải nghiệm sự tinh tế trong từng điểm chạm. Đội ngũ trợ lý riêng của Luxury luôn sẵn sàng hỗ trợ bạn kiến tạo phong cách cá nhân độc bản.
+      <p class="relative text-xs text-white/90 font-semibold tracking-widest uppercase mt-4 z-10 max-w-[600px] text-center px-5 leading-relaxed">
+        Trải nghiệm sự tinh tế trong từng điểm chạm. Đội ngũ trợ lý riêng của Luxury luôn sẵn sàng hỗ trợ bạn.
       </p>
     </div>
 
@@ -140,11 +140,11 @@
         <!-- Address -->
         <div>
           <h3 class="text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-3">
-            ĐỊA CHỈ VĂN PHÒNG
+            ĐỊA CHỈ SHOWROOM
           </h3>
           <p class="text-[14px] text-gray-800 font-medium leading-relaxed">
-            428 Soho Architecture Loft,<br>
-            NY 10012, United States
+            365/10 Nguyễn Thị Kiểu, Tân Thới Hiệp,<br>
+            Quận 12, TP. Hồ Chí Minh, Việt Nam
           </p>
         </div>
 
@@ -154,8 +154,8 @@
             KẾT NỐI TRỰC TIẾP
           </h3>
           <p class="text-[14px] text-gray-800 font-medium space-y-1">
-            <span class="block">Phone: +44 20 7946 0123</span>
-            <span class="block">Email: concierge@luxury.com</span>
+            <span class="block">Hotline: 1900 6868</span>
+            <span class="block">Email: contact@luxuryecom.com</span>
           </p>
         </div>
 
@@ -167,44 +167,36 @@
           <div class="text-[13px] text-gray-800 font-medium divide-y divide-gray-200/50">
             <div class="flex justify-between py-2">
               <span class="text-gray-500">Thứ 2 - Thứ 6</span>
-              <span>9AM - 6PM</span>
+              <span>8:30 AM - 9:30 PM</span>
             </div>
             <div class="flex justify-between py-2">
-              <span class="text-gray-500">Thứ 7</span>
-              <span>10AM - 4PM</span>
-            </div>
-            <div class="flex justify-between py-2">
-              <span class="text-gray-500">Chủ nhật</span>
-              <span class="text-red-500">Đóng cửa</span>
+              <span class="text-gray-500">Thứ 7 & Chủ nhật</span>
+              <span>9:00 AM - 10:00 PM</span>
             </div>
           </div>
         </div>
 
         <!-- Social text links -->
         <div class="flex gap-6 pt-4 border-t border-gray-200 text-[11px] font-bold uppercase tracking-[1.5px] text-gray-400">
-          <a href="#" class="hover:text-black transition-colors">INSTAGRAM</a>
-          <a href="#" class="hover:text-black transition-colors">LINKEDIN</a>
-          <a href="#" class="hover:text-black transition-colors">VOGUE</a>
+          <a href="https://facebook.com" target="_blank" class="hover:text-black transition-colors">FACEBOOK</a>
+          <a href="https://instagram.com" target="_blank" class="hover:text-black transition-colors">INSTAGRAM</a>
+          <a href="https://linkedin.com" target="_blank" class="hover:text-black transition-colors">LINKEDIN</a>
         </div>
       </div>
 
     </div>
 
     <!-- Bottom Map Banner Section -->
-    <div class="w-full relative aspect-[21/9] min-h-[300px] border border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center">
-      <!-- Simulated Grayscale Map Image -->
-      <div 
-        class="absolute inset-0 bg-cover bg-center grayscale opacity-60 filter contrast-125 saturate-0"
-        style="background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1600&auto=format&fit=crop');"
-      ></div>
-      <!-- Center Showroom Badge -->
-      <div class="relative z-10 bg-black text-white p-6 md:p-8 text-center flex flex-col items-center justify-center border border-white/10 min-w-[220px] shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
-        <svg class="mb-3 text-white" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-          <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-        <span class="text-[12px] font-bold uppercase tracking-[2.5px] text-white">SHOWROOM NY</span>
-      </div>
+    <div class="w-full relative border border-gray-200 overflow-hidden bg-gray-100 shadow-sm rounded-lg">
+      <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d979.5586797244375!2d106.64034686953386!3d10.869743999330318!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317529e54b5eb10d%3A0x31933be8a4b215c9!2zMzY1LzEwIE5ndXnhu4VuIFRo4buLIEtp4buDdSwgVMOibiBUaOG7m2kgSGnhu4dwLCBI4buTIENow60gTWluaCA3MDAwMDAsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1788364507494!5m2!1svi!2s" 
+        width="100%" 
+        height="450" 
+        style="border:0; display: block;" 
+        allowfullscreen="" 
+        loading="lazy" 
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
     </div>
 
     </div>

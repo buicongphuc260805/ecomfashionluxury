@@ -20,11 +20,9 @@
 
         <!-- Left Panel: Brand/Model Image -->
         <div 
-          class="hidden md:block md:w-[45%] lg:w-[50%] bg-cover bg-center relative shrink-0"
-          style="background-image: url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop');"
+          class="hidden md:block md:w-[45%] lg:w-[50%] bg-cover bg-[center_top] bg-no-repeat relative shrink-0 bg-white"
+          style="background-image: url('/img/auth/auth-client.jpg');"
         >
-          <!-- Subtle overlay to make it look premium -->
-          <div class="absolute inset-0 bg-neutral-900/5"></div>
         </div>
 
         <!-- Success Toast (hiển thị ở góc dưới modal) -->

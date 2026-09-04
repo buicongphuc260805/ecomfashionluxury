@@ -219,19 +219,26 @@ class StatisticRepository implements StatisticRepositoryInterface
             ->join('orders', 'order_details.order_id', '=', 'orders.id')
             ->join('product_variants', 'order_details.product_variant_id', '=', 'product_variants.id')
             ->join('products', 'product_variants.product_id', '=', 'products.id')
-            ->selectRaw('products.id, products.name, products.thumbnail')
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->selectRaw('products.id, products.name, products.thumbnail, categories.name as category_name')
             ->selectRaw('SUM(order_details.quantity) as total_sold')
             ->selectRaw('SUM(order_details.unit_price * order_details.quantity) as total_revenue')
             ->where('orders.status', '!=', 'cancelled')
             ->whereBetween('orders.created_at', [$start, $end])
-            ->groupBy('products.id', 'products.name', 'products.thumbnail')
+            ->groupBy('products.id', 'products.name', 'products.thumbnail', 'categories.name')
             ->orderByRaw('total_sold DESC')
             ->limit($limit)
             ->get()
             ->map(fn ($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
+                'category_name' => $r->category_name,
                 'thumbnail' => $r->thumbnail,
+                'image_url' => $r->thumbnail
+                    ? (str_starts_with($r->thumbnail, 'http')
+                        ? $r->thumbnail
+                        : asset('storage/'.$r->thumbnail))
+                    : null,
                 'total_sold' => (int) $r->total_sold,
                 'total_revenue' => round((float) $r->total_revenue, 2),
             ])

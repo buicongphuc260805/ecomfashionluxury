@@ -54,6 +54,20 @@ class GoodReceiptService implements GoodReceiptServiceInterface
             $oldStatus = $model->status;
             $newStatus = $data['status'] ?? $oldStatus;
 
+            // 1. Kiểm tra trạng thái đã đóng (Terminal statuses)
+            if ($oldStatus === 'completed' && $newStatus !== 'completed') {
+                throw new \Exception('Phiếu nhập đã hoàn thành (đã cộng tồn kho), không thể thay đổi trạng thái.');
+            }
+
+            if ($oldStatus === 'cancel' && $newStatus !== 'cancel') {
+                throw new \Exception('Phiếu nhập đã bị hủy, không thể thay đổi trạng thái.');
+            }
+
+            // 2. Không cho phép lùi trạng thái từ đã duyệt về chờ duyệt
+            if ($oldStatus === 'approved' && $newStatus === 'pending') {
+                throw new \Exception('Phiếu nhập đã được duyệt, không thể quay lại trạng thái Chờ duyệt.');
+            }
+
             $details = $data['good_receipt_details'] ?? [];
 
             unset($data['good_receipt_details']);

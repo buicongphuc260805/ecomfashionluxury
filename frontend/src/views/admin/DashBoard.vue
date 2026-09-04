@@ -229,8 +229,12 @@
             
             <!-- Image -->
             <div class="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 border border-slate-200 flex items-center justify-center">
-              <img v-if="product.image_url" :src="product.image_url" :alt="product.name" class="w-full h-full object-cover" />
-              <div v-else class="text-slate-400 text-[10px] font-medium">No img</div>
+              <img 
+                :src="getImageUrl(product.thumbnail || product.image_url)" 
+                :alt="product.name" 
+                class="w-full h-full object-cover" 
+                @error="$event.target.src = 'https://images.unsplash.com/photo-1523381294911-8d3cead13475?q=80&w=100&auto=format&fit=crop'"
+              />
             </div>
             
             <!-- Info & Progress bar -->
@@ -277,6 +281,13 @@ const currentDate = `${day}/${month}/${year}`
 function formatPrice(value) {
   if (!value) return '0 đ'
   return Number(value).toLocaleString('vi-VN') + ' đ'
+}
+
+function getImageUrl(path) {
+  if (!path) return 'https://images.unsplash.com/photo-1523381294911-8d3cead13475?q=80&w=100&auto=format&fit=crop'
+  if (path.startsWith('http')) return path
+  const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  return `${base}/storage/${path}`
 }
 
 function getStatusClass(status) {

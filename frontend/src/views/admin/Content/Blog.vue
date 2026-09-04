@@ -173,7 +173,7 @@
                     {{ blog.status ? 'Hiển thị' : 'Đã ẩn' }}
                   </span>
                 </td>
-                <td class="py-4 px-4 text-xs text-slate-500">{{ blog.created_at }}</td>
+                <td class="py-4 px-4 text-xs text-slate-500">{{ formatDate(blog.created_at) }}</td>
                 <td class="py-4 px-4">
                   <div class="flex items-center justify-end gap-1">
                     <!-- Edit -->
@@ -421,6 +421,7 @@ import { useBlogStore } from '@/stores/admin/blogStore'
 import { uploadService } from '@/services/admin/uploadService'
 import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal.vue'
 import Pagination from '@/components/admin/Pagination.vue'
+import { formatDate } from '@/utils/format.js'
 
 const blogStore = useBlogStore()
 

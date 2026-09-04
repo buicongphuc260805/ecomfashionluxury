@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <!-- Modal Backdrop & Container -->
   <div class="fixed inset-0 z-[9998] flex items-center justify-center p-4"
       :class=" isShowAdd ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'"
@@ -207,6 +207,10 @@
       type: Array,
       default: () => []
     },
+    initialData: {
+      type: Object,
+      default: null
+    }
   });
   const emit = defineEmits(['close', 'onHandleSave']);
   const isSubmitting = ref(false);
@@ -231,12 +235,6 @@
     return `PN${yy}${mm}${dd}-${random}`;
   };
 
-  watch(() => props.isShowAdd, (newVal) => {
-    if (newVal && !newReceipt.value.receipt_code) {
-      newReceipt.value.receipt_code = generateReceiptCode();
-    }
-  }, { immediate: true });
-  
   const goodsReceiptDetails = ref([
     {
       id: Date.now(),
@@ -247,6 +245,41 @@
       searchQuery: '',
     },
   ]);
+
+  watch(() => props.isShowAdd, (newVal) => {
+    if (newVal) {
+      newReceipt.value.receipt_code = generateReceiptCode();
+      if (props.initialData) {
+        newReceipt.value.supplier_id = props.initialData.supplier_id || '';
+        if (props.initialData.good_receipt_details && props.initialData.good_receipt_details.length > 0) {
+          goodsReceiptDetails.value = props.initialData.good_receipt_details.map(detail => ({
+            id: Date.now() + Math.random(),
+            product_variant_id: detail.product_variant_id,
+            product_variant_name: detail.product_variant?.product?.name 
+              ? `${detail.product_variant.product.name} (SKU: ${detail.product_variant.sku})` 
+              : (detail.product_variant?.sku || ''),
+            quantity: detail.quantity,
+            import_price: detail.import_price,
+            searchQuery: detail.product_variant?.product?.name 
+              ? `${detail.product_variant.product.name} (SKU: ${detail.product_variant.sku})` 
+              : (detail.product_variant?.sku || ''),
+          }));
+        }
+      } else {
+        newReceipt.value = { ...initialReceiptState, receipt_code: generateReceiptCode() };
+        goodsReceiptDetails.value = [
+          {
+            id: Date.now(),
+            product_variant_id: '',
+            product_variant_name: '',
+            quantity: 1,
+            import_price: 0,
+            searchQuery: '',
+          },
+        ];
+      }
+    }
+  }, { immediate: true });
   
   // Thêm 1 hàng để nhập chi tiết phiếu nhập hàng
   const addGoodsReceiptDetails = function(){

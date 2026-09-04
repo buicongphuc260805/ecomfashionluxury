@@ -162,17 +162,9 @@
               <!-- ID -->
               <td class="py-4 px-5 font-mono text-xs text-slate-500">{{ customer.id }}</td>
 
-              <!-- Khách hàng (avatar + tên) -->
+              <!-- Khách hàng (tên) -->
               <td class="py-4 px-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-violet-500 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
-                    <img v-if="customer.avatar" :src="customer.avatar" :alt="getFullName(customer)" class="w-full h-full object-cover" />
-                    <span v-else>{{ getInitials(customer.first_name, customer.last_name) }}</span>
-                  </div>
-                  <div>
-                    <p class="font-semibold text-slate-800 leading-tight">{{ getFullName(customer) }}</p>
-                  </div>
-                </div>
+                <p class="font-semibold text-slate-800 leading-tight">{{ getFullName(customer) }}</p>
               </td>
 
               <!-- Email -->

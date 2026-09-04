@@ -1,18 +1,14 @@
 <template>
   <div class="flex justify-center overflow-x-auto w-full">
-    <table class="min-w-[700px] max-w-[900px] border-collapse text-center border border-gray-300 font-text text-[13px]">
+    <table class="min-w-[600px] max-w-[800px] border-collapse text-center border border-gray-300 font-text text-[13px]">
       <thead>
         <tr class="bg-[#d4e6cc] text-gray-800 font-bold">
-          <th colspan="3" class="border border-gray-300 py-3 text-[14px]">NAM</th>
-          <th colspan="3" class="border border-gray-300 py-3 text-[14px]">NỮ</th>
+          <th colspan="3" class="border border-gray-300 py-3 text-[14px]">HƯỚNG DẪN CHỌN SIZE NAM</th>
         </tr>
         <tr class="bg-gray-100 font-bold text-gray-700">
-          <th class="border border-gray-300 py-2.5 w-[16%]">Chiều cao</th>
-          <th class="border border-gray-300 py-2.5 w-[16%]">Cân nặng</th>
-          <th class="border border-gray-300 py-2.5 w-[16%]">Size</th>
-          <th class="border border-gray-300 py-2.5 w-[16%]">Chiều cao</th>
-          <th class="border border-gray-300 py-2.5 w-[16%]">Cân nặng</th>
-          <th class="border border-gray-300 py-2.5 w-[16%]">Size</th>
+          <th class="border border-gray-300 py-2.5 w-[33%]">Chiều cao</th>
+          <th class="border border-gray-300 py-2.5 w-[33%]">Cân nặng</th>
+          <th class="border border-gray-300 py-2.5 w-[34%]">Size</th>
         </tr>
       </thead>
       <tbody>
@@ -20,9 +16,6 @@
           <td class="border border-gray-300 py-2.5">{{ row.mHeight }}</td>
           <td class="border border-gray-300 py-2.5">{{ row.mWeight }}</td>
           <td class="border border-gray-300 py-2.5 font-bold">{{ row.mSize }}</td>
-          <td class="border border-gray-300 py-2.5">{{ row.wHeight }}</td>
-          <td class="border border-gray-300 py-2.5">{{ row.wWeight }}</td>
-          <td class="border border-gray-300 py-2.5 font-bold">{{ row.wSize }}</td>
         </tr>
       </tbody>
     </table>
@@ -33,10 +26,10 @@
 import { ref } from 'vue'
 
 const sizeTable = ref([
-  { mHeight: '1m60-1m65', mWeight: '55-60kg', mSize: '38', wHeight: '1m48-1m53', wWeight: '38-43kg', wSize: '38' },
-  { mHeight: '1m64-1m69', mWeight: '60-65kg', mSize: '39', wHeight: '1m53-1m55', wWeight: '43-46kg', wSize: '39' },
-  { mHeight: '1m70-1m74', mWeight: '66-70kg', mSize: '40', wHeight: '1m53-1m58', wWeight: '46-53kg', wSize: '40' },
-  { mHeight: '1m74-1m76', mWeight: '70-76kg', mSize: '41', wHeight: '1m55-1m62', wWeight: '53-57kg', wSize: '41' },
-  { mHeight: '1m65-1m77', mWeight: '76-80kg', mSize: '42', wHeight: '1m55-1m66', wWeight: '57-66kg', wSize: '42' }
+  { mHeight: '1m60 - 1m65', mWeight: '52 - 58 kg', mSize: 'S (38)' },
+  { mHeight: '1m65 - 1m70', mWeight: '59 - 65 kg', mSize: 'M (39)' },
+  { mHeight: '1m70 - 1m75', mWeight: '66 - 72 kg', mSize: 'L (40)' },
+  { mHeight: '1m75 - 1m80', mWeight: '73 - 79 kg', mSize: 'XL (41)' },
+  { mHeight: '1m80 - 1m85', mWeight: '80 - 87 kg', mSize: 'XXL (42)' }
 ])
 </script>
