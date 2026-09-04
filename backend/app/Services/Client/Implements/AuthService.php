@@ -8,6 +8,7 @@ use App\Repositories\Client\Interfaces\AuthRepositoryInterface;
 use App\Services\Client\Interfaces\AuthServiceInterface;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -84,7 +85,49 @@ class AuthService implements AuthServiceInterface
             $this->repo->clearExistingOtps($email);
             $this->repo->createOtpRecord($email, $otp);
 
-            Mail::to($email)->send(new OtpMail($otp));
+            try {
+                Mail::to($email)->send(new OtpMail($otp));
+            } catch (Throwable $mailEx) {
+                // Render Free Tier chặn các cổng SMTP 25, 465, 587.
+                // Tự động dùng Brevo HTTP API (Port 443 HTTPS) - không bao giờ bị chặn trên Cloud!
+                $brevoApiKey = env('BREVO_API_KEY') ?: env('MAIL_PASSWORD');
+                $senderEmail = env('MAIL_FROM_ADDRESS', 'phuc0862605045@gmail.com');
+                $senderName = env('MAIL_FROM_NAME', 'Ecom Fashion Luxury');
+
+                if ($brevoApiKey) {
+                    $response = Http::withHeaders([
+                        'api-key' => $brevoApiKey,
+                        'accept' => 'application/json',
+                        'content-type' => 'application/json',
+                    ])->post('https://api.brevo.com/v3/smtp/email', [
+                        'sender' => ['name' => $senderName, 'email' => $senderEmail],
+                        'to' => [['email' => $email]],
+                        'subject' => 'Mã xác thực OTP đặt lại mật khẩu - Ecom Fashion',
+                        'htmlContent' => "
+                            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee;'>
+                                <h2 style='color: #333; text-align: center; font-weight: bold;'>ECOM FASHION</h2>
+                                <p>Xin chào,</p>
+                                <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng sử dụng mã OTP dưới đây để tiếp tục:</p>
+                                <div style='text-align: center; margin: 30px 0;'>
+                                    <span style='font-size: 24px; font-weight: bold; letter-spacing: 5px; padding: 10px 20px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;'>{$otp}</span>
+                                </div>
+                                <p style='color: #666; font-size: 13px;'>Mã xác thực này có hiệu lực trong vòng 10 phút. Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+                            </div>
+                        ",
+                    ]);
+
+                    if ($response->successful()) {
+                        return [
+                            'success' => true,
+                            'message' => 'Mã OTP đã được gửi về email của bạn.',
+                        ];
+                    }
+
+                    throw new \Exception('Brevo API error: '.$response->body());
+                }
+
+                throw $mailEx;
+            }
 
             return [
                 'success' => true,
