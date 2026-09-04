@@ -13,7 +13,6 @@ mkdir -p storage/logs \
 
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
-php artisan key:generate --force --no-interaction 2>/dev/null || true
 php artisan storage:link 2>/dev/null || true
 
 echo "🗄️  [entrypoint] Running migrations..."
